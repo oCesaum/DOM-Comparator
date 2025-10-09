@@ -977,19 +977,85 @@ body {
     margin: 0 var(--space-10);
 }
 
-/* Grid para áreas de HTML */
-.html-grid {
+/* Grid para áreas de Sitemap */
+.sitemap-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-24);
     margin-bottom: var(--space-32);
 }
 
-.html-column h3 {
+.sitemap-column h3 {
     color: var(--color-primary);
     margin-bottom: var(--space-10);
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
+}
+
+/* Seção de configuração do site */
+.site-config-section {
+    background: var(--color-secondary);
+    padding: var(--space-24);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-32);
+    border-left: 5px solid var(--color-primary);
+}
+
+.site-config-section h2 {
+    color: var(--color-primary);
+    margin-bottom: var(--space-20);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+}
+
+.site-input-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-20);
+    margin-bottom: var(--space-24);
+}
+
+.site-actions {
+    display: flex;
+    gap: var(--space-16);
+    justify-content: center;
+}
+
+.form-text {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    margin-top: var(--space-4);
+}
+
+/* Prévia do sitemap */
+.sitemap-preview {
+    background: var(--color-secondary);
+    border-radius: var(--radius-base);
+    padding: var(--space-16);
+    border: 1px solid var(--color-border);
+}
+
+.sitemap-preview h4 {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-10);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: var(--font-weight-medium);
+}
+
+.sitemap-code {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-10);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+    max-height: 150px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    color: var(--color-text);
 }
 
 /* Textareas */

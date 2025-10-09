@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOM Comparator Aprimorado - Normalização de HTML</title>
+    <title>Sitemap Comparator Robot - Comparação de Sitemaps</title>
     <link rel="stylesheet" href="styles.css">
     
     <!-- Dependências -->
@@ -12,146 +12,131 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1>DOM Comparator Aprimorado</h1>
-            <p>Detecta TODAS as mudanças entre dois códigos HTML - com normalização inteligente</p>
+            <h1>🤖 Sitemap Comparator Robot</h1>
+            <p>Robô inteligente para buscar e comparar sitemaps de sites automaticamente</p>
             <div class="feature-badge">
-                <span class="badge">✨ NOVO: Ignora quebras de linha e formatação</span>
+                <span class="badge">✨ NOVO: Comparação automática de sitemaps</span>
             </div>
         </header>
 
         <div class="content">
-            <!-- Exemplos -->
-            <section class="examples-section">
-                <h2>Exemplos Pré-definidos</h2>
-                <div class="examples-grid">
-                    <button class="btn btn--secondary" onclick="loadExample('estilo')">
-                        Exemplo: Mudança de Estilo
-                    </button>
-                    <button class="btn btn--secondary" onclick="loadExample('texto')">
-                        Exemplo: Mudança de Texto
-                    </button>
-                    <button class="btn btn--secondary" onclick="loadExample('atributo')">
-                        Exemplo: Mudança de Atributo
-                    </button>
-                    <button class="btn btn--secondary" onclick="loadExample('estrutura')">
-                        Exemplo: Mudança de Estrutura
-                    </button>
-                    <button class="btn btn--highlight" onclick="loadExample('formatacao')">
-                        🆕 Exemplo: Formatação Diferente
-                    </button>
-                    <button class="btn btn--outline" onclick="clearFields()">
-                        Limpar Campos
-                    </button>
-                </div>
-            </section>
-
-            <!-- Controles de Normalização -->
-            <section class="normalization-section">
-                <h3>Opções de Normalização</h3>
-                <div class="options-grid">
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="normalizeWhitespace" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Normalizar espaços em branco e quebras de linha</span>
-                    </label>
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="normalizeAttributes" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Ordenar atributos alfabeticamente</span>
-                    </label>
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="ignoreComments" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Ignorar comentários HTML</span>
-                    </label>
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="normalizeCase" checked>
-                        <span class="checkmark"></span>
-                        <span class="label-text">Normalizar maiúsculas/minúsculas de tags</span>
-                    </label>
-                </div>
-            </section>
-
-            <!-- Áreas de HTML -->
-            <div class="html-grid">
-                <div class="html-column">
-                    <h3>HTML A (Original) *</h3>
-                    <textarea id="htmlA" placeholder="Cole aqui o código HTML original..."></textarea>
-                    <div class="normalized-preview">
-                        <h4>Prévia Normalizada:</h4>
-                        <pre id="normalizedA" class="normalized-code"></pre>
+            <!-- Configuração do Site -->
+            <section class="site-config-section">
+                <h2>🌐 Configuração do Site</h2>
+                <div class="site-input-group">
+                    <div class="form-group">
+                        <label for="siteUrl" class="form-label">URL do Site:</label>
+                        <input type="url" id="siteUrl" class="form-control" placeholder="https://exemplo.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sitemapUrl" class="form-label">URL do Sitemap (opcional):</label>
+                        <input type="url" id="sitemapUrl" class="form-control" placeholder="https://exemplo.com/sitemap.xml">
+                        <small class="form-text">Deixe vazio para buscar automaticamente</small>
                     </div>
                 </div>
-                <div class="html-column">
-                    <h3>HTML B (Modificado) *</h3>
-                    <textarea id="htmlB" placeholder="Cole aqui o código HTML modificado..."></textarea>
-                    <div class="normalized-preview">
-                        <h4>Prévia Normalizada:</h4>
-                        <pre id="normalizedB" class="normalized-code"></pre>
+                <div class="site-actions">
+                    <button id="fetchSitemapBtn" class="btn btn--primary btn--large">
+                        🔍 Buscar Sitemap
+                    </button>
+                    <button id="compareWithSelfBtn" class="btn btn--highlight btn--large">
+                        🔄 Comparar Consigo Mesmo
+                    </button>
+                    <button id="manualSitemapBtn" class="btn btn--outline btn--large">
+                        📋 Inserir Manualmente
+                    </button>
+                </div>
+            </section>
+
+            <!-- Status do Sitemap -->
+            <section id="sitemapStatus" class="status-section hidden">
+                <div class="status-header">
+                    <span class="status-icon">📋</span>
+                    <h3>Status do Sitemap</h3>
+                </div>
+                <div id="sitemapInfo" class="status-info"></div>
+            </section>
+
+            <!-- Áreas de Sitemap -->
+            <div class="sitemap-grid">
+                <div class="sitemap-column">
+                    <h3>Sitemap A (Original) *</h3>
+                    <textarea id="sitemapA" placeholder="Cole aqui o sitemap original ou deixe o robô buscar..."></textarea>
+                    <div class="sitemap-preview">
+                        <h4>Prévia do Sitemap:</h4>
+                        <pre id="previewA" class="sitemap-code"></pre>
+                    </div>
+                </div>
+                <div class="sitemap-column">
+                    <h3>Sitemap B (Comparação) *</h3>
+                    <textarea id="sitemapB" placeholder="Cole aqui o sitemap para comparação..."></textarea>
+                    <div class="sitemap-preview">
+                        <h4>Prévia do Sitemap:</h4>
+                        <pre id="previewB" class="sitemap-code"></pre>
                     </div>
                 </div>
             </div>
 
+
             <!-- Botão Comparar -->
             <section class="compare-section">
                 <button id="compareBtn" class="btn btn--primary btn--large">
-                    Comparar HTML com Normalização Inteligente
+                    🔍 Comparar Sitemaps
                 </button>
-                <button id="previewBtn" class="btn btn--secondary btn--large">
-                    Prévia da Normalização
+                <button id="analyzeBtn" class="btn btn--secondary btn--large">
+                    📊 Analisar Sitemap
                 </button>
             </section>
 
-            <!-- Status da Normalização -->
-            <section id="normalizationStatus" class="status-section hidden">
+            <!-- Status da Análise -->
+            <section id="analysisStatus" class="status-section hidden">
                 <div class="status-header">
-                    <span class="status-icon">📋</span>
-                    <h3>Status da Normalização</h3>
+                    <span class="status-icon">📊</span>
+                    <h3>Status da Análise</h3>
                 </div>
-                <div id="normalizationInfo" class="status-info"></div>
+                <div id="analysisInfo" class="status-info"></div>
             </section>
 
             <!-- Resultados -->
             <section id="resultSection" class="results-section hidden">
                 <div class="results-header">
                     <span id="operationCount" class="operation-count">0 diferenças</span>
-                    <h3>Análise Completa das Diferenças</h3>
+                    <h3>Análise Completa dos Sitemaps</h3>
                 </div>
                 
                 <div class="comparison-methods">
-                    <!-- Método 1: Comparação Normalizada -->
+                    <!-- Método 1: Comparação de URLs -->
                     <div class="method-card method-card--primary">
-                        <h4>🎯 Comparação Normalizada</h4>
-                        <p>Compara HTML após normalização, ignorando formatação irrelevante.</p>
-                        <div id="normalizedResult" class="method-result"></div>
+                        <h4>🔗 Comparação de URLs</h4>
+                        <p>Detecta URLs adicionadas, removidas ou modificadas no sitemap.</p>
+                        <div id="urlResult" class="method-result"></div>
                     </div>
 
-                    <!-- Método 2: Comparação Textual Original -->
+                    <!-- Método 2: Análise de Prioridades -->
                     <div class="method-card">
-                        <h4>🔤 Comparação Textual Original</h4>
-                        <p>Compara o código como texto puro, detectando qualquer mudança.</p>
-                        <div id="textResult" class="method-result"></div>
+                        <h4>⭐ Análise de Prioridades</h4>
+                        <p>Compara valores de prioridade (priority) entre os sitemaps.</p>
+                        <div id="priorityResult" class="method-result"></div>
                     </div>
 
-                    <!-- Método 3: DOM Comparator Original -->
+                    <!-- Método 3: Análise de Frequências -->
                     <div class="method-card">
-                        <h4>🔧 DOM Comparator (Wingify)</h4>
-                        <p>Análise estrutural usando a biblioteca original da Wingify.</p>
-                        <div id="domResult" class="method-result"></div>
+                        <h4>🔄 Análise de Frequências</h4>
+                        <p>Detecta mudanças nas frequências de atualização (changefreq).</p>
+                        <div id="frequencyResult" class="method-result"></div>
                     </div>
 
-                    <!-- Método 4: Análise de Atributos -->
+                    <!-- Método 4: Análise de Datas -->
                     <div class="method-card">
-                        <h4>📝 Análise de Atributos e Estilos</h4>
-                        <p>Detecta especificamente mudanças em atributos, classes e estilos.</p>
-                        <div id="attributeResult" class="method-result"></div>
+                        <h4>📅 Análise de Datas</h4>
+                        <p>Compara datas de última modificação (lastmod) entre os sitemaps.</p>
+                        <div id="dateResult" class="method-result"></div>
                     </div>
 
-                    <!-- Método 5: Comparação Hash -->
+                    <!-- Método 5: Estatísticas Gerais -->
                     <div class="method-card">
-                        <h4>🔐 Comparação por Hash</h4>
-                        <p>Gera hash único para cada elemento e detecta diferenças.</p>
-                        <div id="hashResult" class="method-result"></div>
+                        <h4>📊 Estatísticas Gerais</h4>
+                        <p>Mostra estatísticas comparativas dos dois sitemaps.</p>
+                        <div id="statsResult" class="method-result"></div>
                     </div>
                 </div>
             </section>
