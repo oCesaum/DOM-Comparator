@@ -59,6 +59,9 @@
     <!-- Dependências -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="font-base bg-background text-text min-h-screen p-5 relative">
     <!-- Padrão de fundo sutil -->
@@ -70,16 +73,16 @@
             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
             
             <!-- Botão Toggle de Tema -->
-            <div class="absolute top-6 right-6">
+            <div class="absolute top-6 right-6 z-50">
                 <button id="themeToggle" class="bg-white/10 text-white p-3 rounded-xl border border-white/20 backdrop-blur-sm hover:bg-white/20 hover:border-white/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50 hover:scale-102" title="Alternar para tema escuro">
-                    <span id="themeIcon" class="text-xl">🌙</span>
+                    <span id="themeIcon" class="fas fa-moon text-xl"></span>
                 </button>
             </div>
             
-            <h1 class="text-6xl font-bold mb-6 animate-title-fade-in tracking-tight">🔧 DOM Comparator Universal</h1>
+            <h1 class="text-6xl font-bold mb-6 animate-title-fade-in tracking-tight"><i class="fas fa-tools mr-4"></i>DOM Comparator Universal</h1>
             <p class="text-xl opacity-90 mb-8 animate-subtitle-fade-in max-w-4xl mx-auto leading-relaxed">Ferramenta completa para comparação de sitemaps e HTML com normalização inteligente</p>
             <div class="mt-6 animate-badge-slide-in">
-                <span class="bg-white/10 text-white px-6 py-3 rounded-full text-sm font-medium border border-white/20 backdrop-blur-sm inline-block hover:bg-white/20 transition-all duration-200">✨ NOVO: Comparação automática de sitemaps</span>
+                <span class="bg-white/10 text-white px-6 py-3 rounded-full text-sm font-medium border border-white/20 backdrop-blur-sm inline-block hover:bg-white/20 transition-all duration-200"><i class="fas fa-sparkles mr-2"></i>NOVO: Comparação automática de sitemaps</span>
             </div>
             
             <!-- Seletor de Modo -->
@@ -87,14 +90,14 @@
                 <label class="cursor-pointer relative">
                     <input type="radio" name="comparatorMode" value="sitemap" checked class="absolute opacity-0 cursor-pointer">
                     <span class="flex items-center gap-3 px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white font-medium transition-all duration-200 backdrop-blur-sm hover:bg-white/20 hover:border-white/30 hover:scale-102 hover:shadow-lg">
-                        <span class="text-xl">🤖</span>
+                        <i class="fas fa-robot text-xl"></i>
                         <span class="text-lg">Sitemap</span>
                     </span>
                 </label>
                 <label class="cursor-pointer relative">
                     <input type="radio" name="comparatorMode" value="html" class="absolute opacity-0 cursor-pointer">
                     <span class="flex items-center gap-3 px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white font-medium transition-all duration-200 backdrop-blur-sm hover:bg-white/20 hover:border-white/30 hover:scale-102 hover:shadow-lg">
-                        <span class="text-xl">🔧</span>
+                        <i class="fas fa-code text-xl"></i>
                         <span class="text-lg">HTML</span>
                     </span>
                 </label>
@@ -104,7 +107,7 @@
         <div class="p-10">
             <!-- Configuração do Site -->
             <section class="bg-surface-light p-8 rounded-2xl mb-10 border border-border opacity-0 transform -translate-x-8 animate-section-slide-in hover:border-border-light transition-all duration-200">
-                <h2 class="text-primary mb-6 text-3xl font-bold">🌐 Configuração do Site</h2>
+                <h2 class="text-primary mb-6 text-3xl font-bold"><i class="fas fa-globe mr-3"></i>Configuração do Site</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="mb-6">
                         <label for="siteUrl" class="block mb-3 font-semibold text-base text-text">URL do Site:</label>
@@ -118,13 +121,13 @@
                 </div>
                 <div class="flex flex-wrap gap-4 justify-center">
                     <button id="fetchSitemapBtn" class="inline-flex items-center justify-center px-8 py-4 bg-primary text-white rounded-xl font-bold text-lg transition-all duration-200 hover:bg-primary-hover hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
-                        🔍 Buscar Sitemap
+                        <i class="fas fa-search mr-2"></i>Buscar Sitemap
                     </button>
                     <button id="compareWithSelfBtn" class="inline-flex items-center justify-center px-8 py-4 bg-success text-white rounded-xl font-bold text-lg transition-all duration-200 hover:bg-success/90 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-success/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
-                        🔄 Comparar Consigo Mesmo
+                        <i class="fas fa-sync-alt mr-2"></i>Comparar Consigo Mesmo
                     </button>
                     <button id="manualSitemapBtn" class="inline-flex items-center justify-center px-8 py-4 bg-transparent text-accent border-2 border-accent rounded-xl font-bold text-lg transition-all duration-200 hover:bg-accent/10 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-accent/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
-                        📋 Inserir Manualmente
+                        <i class="fas fa-clipboard mr-2"></i>Inserir Manualmente
                     </button>
                 </div>
             </section>
@@ -148,7 +151,7 @@
                             Exemplo: Mudança de Estrutura
                         </button>
                         <button class="inline-flex items-center justify-center px-6 py-3 bg-success text-white rounded-xl font-bold transition-all duration-200 hover:bg-success/90 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-success/40 hover:scale-105" onclick="loadExample('formatacao')">
-                            🆕 Exemplo: Formatação Diferente
+                            <i class="fas fa-star mr-2"></i>Exemplo: Formatação Diferente
                         </button>
                         <button class="inline-flex items-center justify-center px-6 py-3 bg-transparent text-warning border-2 border-warning rounded-xl font-semibold transition-all duration-200 hover:bg-warning/10 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-warning/40 hover:scale-105" onclick="clearFields()">
                             Limpar Campos
@@ -216,7 +219,7 @@
                 <!-- Status da Normalização -->
                 <section id="normalizationStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
                     <div class="flex items-center mb-4">
-                        <span class="text-3xl mr-3">📋</span>
+                        <i class="fas fa-clipboard-list text-3xl mr-3 text-primary"></i>
                         <h3 class="text-xl font-bold text-text">Status da Normalização</h3>
                     </div>
                     <div id="normalizationInfo" class="text-base text-text-secondary leading-relaxed"></div>
@@ -226,7 +229,7 @@
             <!-- Status do Sitemap -->
             <section id="sitemapStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
                 <div class="flex items-center mb-4">
-                    <span class="text-3xl mr-3">📋</span>
+                    <i class="fas fa-clipboard-list text-3xl mr-3 text-primary"></i>
                     <h3 class="text-xl font-bold text-text">Status do Sitemap</h3>
                 </div>
                 <div id="sitemapInfo" class="text-base text-text-secondary leading-relaxed"></div>
@@ -256,17 +259,17 @@
             <!-- Botão Comparar -->
             <section class="text-center my-10">
                 <button id="compareBtn" class="inline-flex items-center justify-center px-10 py-5 bg-primary text-white rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary-hover hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
-                    🔍 Comparar Sitemaps
+                    <i class="fas fa-search mr-3"></i>Comparar Sitemaps
                 </button>
                 <button id="analyzeBtn" class="inline-flex items-center justify-center px-10 py-5 bg-surface-light text-primary border-2 border-primary rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary/10 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102 ml-6">
-                    📊 Analisar Sitemap
+                    <i class="fas fa-chart-bar mr-3"></i>Analisar Sitemap
                 </button>
             </section>
 
             <!-- Status da Análise -->
             <section id="analysisStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
                 <div class="flex items-center mb-4">
-                    <span class="text-3xl mr-3">📊</span>
+                    <i class="fas fa-chart-bar text-3xl mr-3 text-primary"></i>
                     <h3 class="text-xl font-bold text-text">Status da Análise</h3>
                 </div>
                 <div id="analysisInfo" class="text-base text-text-secondary leading-relaxed"></div>
@@ -284,35 +287,35 @@
                     <div id="sitemapMethods" class="space-y-6">
                         <!-- Método 1: Comparação de URLs -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-primary transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-primary-hover">
-                            <h4 class="text-primary font-bold mb-4 text-xl">🔗 Comparação de URLs</h4>
+                            <h4 class="text-primary font-bold mb-4 text-xl"><i class="fas fa-link mr-2"></i>Comparação de URLs</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Detecta URLs adicionadas, removidas ou modificadas no sitemap.</p>
                             <div id="urlResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 2: Análise de Prioridades -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
-                            <h4 class="text-text font-bold mb-4 text-xl">⭐ Análise de Prioridades</h4>
+                            <h4 class="text-text font-bold mb-4 text-xl"><i class="fas fa-star mr-2"></i>Análise de Prioridades</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Compara valores de prioridade (priority) entre os sitemaps.</p>
                             <div id="priorityResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 3: Análise de Frequências -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
-                            <h4 class="text-text font-bold mb-4 text-xl">🔄 Análise de Frequências</h4>
+                            <h4 class="text-text font-bold mb-4 text-xl"><i class="fas fa-sync-alt mr-2"></i>Análise de Frequências</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Detecta mudanças nas frequências de atualização (changefreq).</p>
                             <div id="frequencyResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 4: Análise de Datas -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
-                            <h4 class="text-text font-bold mb-4 text-xl">📅 Análise de Datas</h4>
+                            <h4 class="text-text font-bold mb-4 text-xl"><i class="fas fa-calendar-alt mr-2"></i>Análise de Datas</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Compara datas de última modificação (lastmod) entre os sitemaps.</p>
                             <div id="dateResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 5: Estatísticas Gerais -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
-                            <h4 class="text-text font-bold mb-4 text-xl">📊 Estatísticas Gerais</h4>
+                            <h4 class="text-text font-bold mb-4 text-xl"><i class="fas fa-chart-pie mr-2"></i>Estatísticas Gerais</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Mostra estatísticas comparativas dos dois sitemaps.</p>
                             <div id="statsResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
@@ -322,35 +325,35 @@
                     <div id="htmlMethods" class="hidden space-y-6">
                         <!-- Método 1: Comparação Normalizada -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-primary transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-primary-hover">
-                            <h4 class="text-primary font-bold mb-4 text-xl">🎯 Comparação Normalizada</h4>
+                            <h4 class="text-primary font-bold mb-4 text-xl"><i class="fas fa-bullseye mr-2"></i>Comparação Normalizada</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Compara HTML após normalização, ignorando formatação irrelevante.</p>
                             <div id="normalizedResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 2: Comparação Textual Original -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
-                            <h4 class="text-text font-bold mb-4 text-xl">🔤 Comparação Textual Original</h4>
+                            <h4 class="text-text font-bold mb-4 text-xl"><i class="fas fa-font mr-2"></i>Comparação Textual Original</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Compara o código como texto puro, detectando qualquer mudança.</p>
                             <div id="textResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 3: DOM Comparator Original -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
-                            <h4 class="text-text font-bold mb-4 text-xl">🔧 DOM Comparator (Wingify)</h4>
+                            <h4 class="text-text font-bold mb-4 text-xl"><i class="fas fa-tools mr-2"></i>DOM Comparator (Wingify)</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Análise estrutural usando a biblioteca original da Wingify.</p>
                             <div id="domResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 4: Análise de Atributos -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
-                            <h4 class="text-text font-bold mb-4 text-xl">📝 Análise de Atributos e Estilos</h4>
+                            <h4 class="text-text font-bold mb-4 text-xl"><i class="fas fa-edit mr-2"></i>Análise de Atributos e Estilos</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Detecta especificamente mudanças em atributos, classes e estilos.</p>
                             <div id="attributeResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 5: Comparação Hash -->
                         <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
-                            <h4 class="text-text font-bold mb-4 text-xl">🔐 Comparação por Hash</h4>
+                            <h4 class="text-text font-bold mb-4 text-xl"><i class="fas fa-lock mr-2"></i>Comparação por Hash</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Gera hash único para cada elemento e detecta diferenças.</p>
                             <div id="hashResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
@@ -360,7 +363,7 @@
 
             <!-- Seção de Erro (mantida para compatibilidade, mas não será usada) -->
             <section id="errorSection" class="mt-10 p-8 bg-surface-light rounded-2xl border-l-4 border-error hidden hover:border-border-light transition-all duration-200">
-                <h3 class="text-error font-bold text-xl mb-4">❌ Erro na Comparação</h3>
+                <h3 class="text-error font-bold text-xl mb-4"><i class="fas fa-exclamation-triangle mr-2"></i>Erro na Comparação</h3>
                 <p id="errorMessage" class="text-text-secondary leading-relaxed"></p>
             </section>
         </div>
@@ -370,7 +373,7 @@
     <div id="notificationPopup" class="fixed bottom-4 right-4 z-50 transform translate-x-full opacity-0 transition-all duration-200 ease-in-out">
         <div class="bg-surface-light border border-border rounded-2xl shadow-2xl p-6 max-w-sm">
             <div class="flex items-start gap-4">
-                <div id="notificationIcon" class="text-2xl flex-shrink-0">❌</div>
+                <div id="notificationIcon" class="text-2xl flex-shrink-0"><i class="fas fa-exclamation-triangle"></i></div>
                 <div class="flex-1">
                     <h4 id="notificationTitle" class="font-bold text-lg mb-2 text-text">Erro</h4>
                     <p id="notificationMessage" class="text-text-secondary text-sm leading-relaxed"></p>

@@ -6,6 +6,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![jQuery](https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white)](https://jquery.com/)
 [![Underscore.js](https://img.shields.io/badge/Underscore.js-0371B5?style=for-the-badge&logo=underscore.js&logoColor=white)](https://underscorejs.org/)
+[![FontAwesome](https://img.shields.io/badge/FontAwesome-339AF0?style=for-the-badge&logo=fontawesome&logoColor=white)](https://fontawesome.com/)
 
 > **Ferramenta web completa para comparação de sitemaps XML e código HTML com normalização inteligente, robô automatizado e interface moderna com suporte a tema claro/escuro**
 
@@ -38,15 +39,18 @@ A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ign
 
 ### 🎪 Características Principais
 
-- **🤖 Robô de Sitemap Inteligente**: Busca automática em múltiplos caminhos comuns, proxy CORS e validação XML
+- **🤖 Robô de Sitemap Inteligente**: Busca automática em 7 caminhos comuns, proxy CORS triplo e validação XML robusta
 - **🔧 Normalização Inteligente**: Remove diferenças de formatação desnecessárias com 4 opções configuráveis
 - **📊 Múltiplos Métodos**: 5 algoritmos diferentes de comparação para cada modo (10 total)
 - **🎨 Interface Moderna**: Design system baseado no Tailwind CSS com suporte completo a tema claro/escuro
 - **⚡ Performance Otimizada**: Processamento assíncrono, lazy loading e otimizações de memória
-- **📱 Totalmente Responsivo**: Breakpoints específicos para desktop, tablet e mobile
-- **🔄 Proxy CORS Automático**: Resolve problemas de CORS usando múltiplos proxies
-- **🎭 Sistema de Notificações**: Feedback visual em tempo real com diferentes tipos de alerta
-- **📋 Exemplos Pré-definidos**: Casos de uso prontos para teste e demonstração
+- **📱 Totalmente Responsivo**: 4 breakpoints específicos (desktop, tablet, mobile, mobile portrait)
+- **🔄 Proxy CORS Triplo**: Resolve problemas de CORS usando 3 proxies diferentes (AllOrigins, CORS Anywhere, CodeTabs)
+- **🎭 Sistema de Notificações**: Toast notifications com 4 tipos diferentes (sucesso, erro, aviso, info)
+- **📋 Exemplos Pré-definidos**: 5 casos de uso prontos para teste e demonstração
+- **🌙 Tema Claro/Escuro**: Alternância completa com persistência no localStorage
+- **🔍 Prévia em Tempo Real**: Atualização automática conforme digitação
+- **📊 Análise Estatística**: Estatísticas detalhadas e contadores dinâmicos
 
 ## ✨ Funcionalidades
 
@@ -54,11 +58,12 @@ A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ign
 
 #### 🔍 Busca Automática de Sitemaps
 - **Detecção Inteligente**: Busca sitemaps em 7 caminhos comuns (`/sitemap.xml`, `/sitemap_index.xml`, `/sitemaps.xml`, `/sitemap/sitemap.xml`, `/sitemap/index.xml`, `/sitemap.xml.gz`, `/sitemap/sitemap.xml.gz`)
-- **Proxy CORS Multiplo**: Resolve problemas de CORS usando 3 proxies diferentes (AllOrigins, CORS Anywhere, CodeTabs)
+- **Proxy CORS Triplo**: Resolve problemas de CORS usando 3 proxies diferentes (AllOrigins, CORS Anywhere, CodeTabs) com fallback automático
 - **Validação XML Robusta**: Verifica se o conteúdo é um sitemap válido (`<urlset>` ou `<sitemapindex>`) antes do processamento
-- **Fallback Manual Inteligente**: Diálogo modal para inserção manual quando CORS falha, com instruções detalhadas
-- **Headers Personalizados**: User-Agent específico e headers de idioma para melhor compatibilidade
+- **Fallback Manual Inteligente**: Diálogo modal para inserção manual quando CORS falha, com instruções detalhadas e link direto
+- **Headers Personalizados**: User-Agent específico (`SitemapComparatorRobot/1.0`) e headers de idioma para melhor compatibilidade
 - **Tratamento de Erros**: Mensagens informativas e sugestões de solução para diferentes tipos de erro
+- **Comparação Consigo Mesmo**: Funcionalidade para testar a ferramenta comparando um sitemap com ele mesmo
 
 #### 📊 Comparação de Sitemaps (5 Métodos)
 - **🔗 Comparação de URLs**: Detecta URLs adicionadas, removidas ou modificadas com contadores detalhados
@@ -76,6 +81,8 @@ A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ign
 - **Normalização de Case**: Converte tags para minúsculas (`<DIV>` → `<div>`)
 - **Cálculo de Similaridade**: Algoritmo de Levenshtein para percentual de similaridade
 - **Prévia em Tempo Real**: Mostra HTML normalizado conforme você digita
+- **Status de Normalização**: Informações detalhadas sobre o processo de normalização
+- **Compressão de Dados**: Estatísticas de compressão após normalização
 
 #### 📝 Comparação Textual Original
 - **Análise Linha por Linha**: Detecta qualquer mudança no código fonte original
@@ -107,9 +114,10 @@ A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ign
 #### 🎭 Sistema de Notificações
 - **Notificações Toast**: Popup no canto inferior direito com diferentes tipos (sucesso, erro, aviso, info)
 - **Auto-dismiss**: Notificações desaparecem automaticamente após 3-5 segundos
-- **Ícones Visuais**: Emojis específicos para cada tipo de notificação
-- **Cores Temáticas**: Bordas coloridas baseadas no tipo de notificação
+- **Ícones FontAwesome**: Ícones específicos para cada tipo de notificação (check-circle, exclamation-triangle, info-circle)
+- **Cores Temáticas**: Bordas coloridas baseadas no tipo de notificação com backdrop-filter
 - **Interação Manual**: Botão de fechar para controle do usuário
+- **Animações Suaves**: Transições de entrada e saída com transform e opacity
 
 #### 🌙 Sistema de Temas
 - **Tema Claro/Escuro**: Alternância completa entre temas com persistência no localStorage
@@ -123,6 +131,7 @@ A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ign
 - **Carregamento Instantâneo**: Um clique para popular os campos com exemplos
 - **Cobertura Completa**: Exemplos cobrem todos os tipos de diferenças detectáveis
 - **Botão de Limpeza**: Limpa todos os campos com um clique
+- **Exemplo Destacado**: Exemplo de "Formatação Diferente" com badge especial
 
 #### ⚡ Feedback Visual
 - **Indicadores de Carregamento**: Spinner animado durante processamento
@@ -342,17 +351,18 @@ DOM Comparator Universal/
 └── 📖 README.md              # Documentação completa e detalhada
 ```
 
-### 📄 index.html (390 linhas)
+### 📄 index.html (393 linhas)
 - **Interface Dual Moderna**: Seletor de modo com radio buttons estilizados para alternar entre Sitemap e HTML
 - **Estrutura Semântica HTML5**: Meta tags completas para responsividade e SEO
-- **Dependências Externas**: jQuery 3.6.0, Underscore.js 1.9.1, Tailwind CSS via CDN
+- **Dependências Externas**: jQuery 3.6.0, Underscore.js 1.9.1, Tailwind CSS via CDN, FontAwesome 6.5.1
 - **Configuração de Site**: Campos para URL do site e sitemap específico com validação
 - **Áreas de Comparação**: Textareas responsivos com prévia em tempo real
 - **Resultados Dinâmicos**: Seções que alternam conforme o modo selecionado
 - **Sistema de Notificações**: Popup modal para feedback do usuário
 - **Toggle de Tema**: Botão para alternar entre tema claro e escuro
+- **Configuração Tailwind**: Configuração customizada com paleta de cores e animações
 
-### 🎨 styles-tailwind.css (725 linhas)
+### 🎨 styles-tailwind.css (822 linhas)
 - **Design System Avançado**: Sistema de tokens baseado no Tailwind CSS com paleta moderna
 - **Tema Claro/Escuro Completo**: Suporte automático via `prefers-color-scheme` e controle manual
 - **Responsividade Total**: Breakpoints específicos para desktop (1280px+), tablet (768px-1024px), mobile (480px-768px) e mobile portrait (<480px)
@@ -360,10 +370,12 @@ DOM Comparator Universal/
 - **Componentes Reutilizáveis**: Botões, cards, checkboxes customizados, scrollbars
 - **Sistema de Cores**: Paleta completa com variáveis CSS para ambos os temas
 - **Efeitos Visuais**: Gradientes, sombras, backdrop-filter, transições suaves
+- **FontAwesome Integration**: Estilos específicos para ícones FontAwesome
+- **Scrollbar Customizada**: Scrollbars personalizadas para ambos os temas
 
-### ⚡ script.js (2085 linhas)
+### ⚡ script.js (2095 linhas)
 - **Robô de Sitemap Inteligente**: Busca automática em 7 caminhos comuns com fallback manual
-- **Proxy CORS Multiplo**: Integração com 3 proxies diferentes (AllOrigins, CORS Anywhere, CodeTabs)
+- **Proxy CORS Triplo**: Integração com 3 proxies diferentes (AllOrigins, CORS Anywhere, CodeTabs)
 - **10 Métodos de Comparação**: 5 para sitemaps + 5 para HTML com algoritmos distintos
 - **Normalização Inteligente**: 4 opções configuráveis de normalização HTML
 - **Sistema de Notificações**: Toast notifications com 4 tipos diferentes
@@ -372,6 +384,8 @@ DOM Comparator Universal/
 - **Tratamento de Erros Robusto**: Fallbacks, validações e mensagens informativas
 - **Validação XML**: Verificação completa de sitemaps antes do processamento
 - **Algoritmos Avançados**: Levenshtein distance, hash generation, DOM parsing
+- **Sistema de Modos**: Alternância dinâmica entre modo Sitemap e HTML
+- **Prévia em Tempo Real**: Atualização automática conforme digitação
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -390,17 +404,20 @@ DOM Comparator Universal/
 ### 📚 Bibliotecas Externas
 - **jQuery 3.6.0**: Manipulação DOM simplificada, eventos e AJAX
 - **Underscore.js 1.9.1**: Utilitários JavaScript para arrays, objetos e funções
+- **FontAwesome 6.5.1**: Ícones modernos e responsivos para interface
 - **DOM Comparator (Wingify)**: Biblioteca especializada para comparação estrutural de HTML
 - **DOMParser (Nativo)**: Parsing nativo de XML para processamento de sitemaps
 
 ### 🤖 APIs e Funcionalidades Avançadas
 - **Fetch API**: Requisições HTTP modernas com headers personalizados
-- **Proxy CORS Multiplo**: Integração com 3 proxies (AllOrigins, CORS Anywhere, CodeTabs)
+- **Proxy CORS Triplo**: Integração com 3 proxies (AllOrigins, CORS Anywhere, CodeTabs)
 - **XML Parsing**: Processamento nativo de sitemaps XML com validação
 - **Hash Algorithms**: Geração de hashes personalizados para detecção de mudanças
 - **Levenshtein Distance**: Algoritmo de similaridade entre strings
 - **localStorage API**: Persistência de preferências de tema
 - **matchMedia API**: Detecção de preferências do sistema para tema automático
+- **DOMParser API**: Parsing nativo de XML e HTML
+- **Event Listeners**: Sistema completo de eventos com debouncing
 
 ### 🎭 Interface e UX
 - **Toast Notifications**: Sistema de notificações com 4 tipos diferentes
@@ -691,12 +708,19 @@ Robô busca automaticamente em 7 caminhos:
 - **Comparação de Versões**: Identificar mudanças entre atualizações
 - **Detecção de Problemas**: Encontrar URLs quebradas ou removidas
 - **Análise de Prioridades**: Verificar se prioridades estão sendo atualizadas
+- **Validação de Sitemap Index**: Comparar sitemaps index com múltiplos sitemaps
+- **Análise de Frequências**: Monitorar mudanças nas frequências de atualização
+- **Auditoria de Datas**: Verificar se datas de modificação estão atualizadas
 
 ### 🔧 HTML Development
 - **Testes de Regressão**: Verificar se mudanças não quebraram funcionalidades
 - **Comparação de Templates**: Identificar diferenças entre versões
 - **Debugging de Layout**: Encontrar problemas de renderização
 - **Validação de Componentes**: Verificar integridade de componentes
+- **Análise de Atributos**: Detectar mudanças em classes, IDs e estilos
+- **Comparação de Estrutura**: Verificar mudanças na hierarquia DOM
+- **Normalização Inteligente**: Ignorar diferenças de formatação irrelevantes
+- **Análise de Conteúdo**: Detectar mudanças no texto e conteúdo
 
 ### 🔄 Versionamento e Deploy
 - **Comparação de Commits**: Identificar mudanças entre versões
@@ -719,6 +743,9 @@ Robô busca automaticamente em 7 caminhos:
 - **Cleanup Automático**: Limpeza de elementos temporários após processamento
 - **Validação Prévia**: Verificação de dados antes do processamento pesado
 - **Limitação de Resultados**: Mostra primeiras 5-10 diferenças com contador total
+- **Cache de Elementos DOM**: Referências de elementos DOM são armazenadas para reutilização
+- **Processamento em Lotes**: Operações são agrupadas para melhor performance
+- **Otimização de Memória**: Limpeza automática de variáveis temporárias
 
 ### 📊 Métricas de Performance Reais
 - **Tempo de Carregamento Inicial**: < 1.5s (com CDNs)
@@ -748,6 +775,8 @@ Robô busca automaticamente em 7 caminhos:
 - [ ] **Cache Persistente**: localStorage para resultados frequentes
 - [ ] **Service Worker**: Cache offline e atualizações em background
 - [ ] **Intersection Observer**: Lazy loading de seções de resultados
+- [ ] **IndexedDB**: Armazenamento local para dados grandes
+- [ ] **WebAssembly**: Algoritmos de comparação em WASM para maior velocidade
 
 ## 🔒 Segurança
 
@@ -779,6 +808,9 @@ Robô busca automaticamente em 7 caminhos:
 - **Sem Dependências Maliciosas**: Apenas bibliotecas conhecidas e confiáveis
 - **Validação de Entrada**: Todos os inputs são validados antes do processamento
 - **Escape de Output**: Todos os outputs são escapados para prevenir injection
+- **Headers de Segurança**: User-Agent personalizado e headers de segurança
+- **Validação de XML**: Verificação rigorosa de sitemaps XML antes do processamento
+- **Tratamento de Erros Seguro**: Captura segura de erros sem exposição de informações sensíveis
 
 ## 🤝 Contribuição
 
@@ -844,6 +876,20 @@ Robô busca automaticamente em 7 caminhos:
 2. Verifique se o localStorage está habilitado
 3. Recarregue a página
 
+#### Prévia Não Atualiza
+**Problema**: Prévia dos HTMLs não está sendo atualizada em tempo real
+**Solução**:
+1. Verifique se os checkboxes de normalização estão funcionando
+2. Recarregue a página
+3. Tente digitar novamente nos campos HTML
+
+#### Modo HTML Não Aparece
+**Problema**: Interface do modo HTML não está sendo exibida
+**Solução**:
+1. Verifique se o modo HTML está selecionado no seletor de modo
+2. Recarregue a página
+3. Verifique o console do navegador para erros JavaScript
+
 ### 🔍 Debug e Logs
 - **Console do Navegador**: Pressione F12 e verifique a aba Console
 - **Network Tab**: Verifique requisições falhando na aba Network
@@ -868,6 +914,8 @@ Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](L
 - **Wingify** pela biblioteca DOM Comparator
 - **jQuery Foundation** pela biblioteca jQuery
 - **Underscore.js** pelos utilitários JavaScript
+- **FontAwesome** pelos ícones modernos
+- **Tailwind CSS** pelo framework CSS utility-first
 - **Comunidade Open Source** pelo suporte e feedback
 
 ---

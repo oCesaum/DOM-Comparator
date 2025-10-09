@@ -185,7 +185,7 @@ async function fetchSitemap() {
         return;
     }
     
-    showLoading(fetchSitemapBtn, '🔍 Buscando sitemap...');
+    showLoading(fetchSitemapBtn, '<i class="fas fa-search mr-2"></i>Buscando sitemap...');
     hideResults();
     
     try {
@@ -222,7 +222,7 @@ async function fetchSitemap() {
             showError(`Erro ao buscar sitemap: ${error.message}`);
         }
     } finally {
-        hideLoading(fetchSitemapBtn, '🔍 Buscar Sitemap');
+        hideLoading(fetchSitemapBtn, '<i class="fas fa-search mr-2"></i>Buscar Sitemap');
     }
 }
 
@@ -255,7 +255,7 @@ async function compareSitemaps() {
         return;
     }
 
-    showLoading(compareBtn, '🔍 Comparando sitemaps...');
+    showLoading(compareBtn, '<i class="fas fa-search mr-2"></i>Comparando sitemaps...');
     hideResults();
 
     try {
@@ -299,7 +299,7 @@ async function compareSitemaps() {
     } catch (error) {
         showError(`Erro durante a comparação: ${error.message}`);
     } finally {
-        hideLoading(compareBtn, '🔍 Comparar Sitemaps');
+        hideLoading(compareBtn, '<i class="fas fa-search mr-2"></i>Comparar Sitemaps');
     }
 }
 
@@ -312,7 +312,7 @@ async function analyzeSitemap() {
         return;
     }
     
-    showLoading(analyzeBtn, '📊 Analisando sitemap...');
+    showLoading(analyzeBtn, '<i class="fas fa-chart-bar mr-2"></i>Analisando sitemap...');
     hideResults();
     
     try {
@@ -330,7 +330,7 @@ async function analyzeSitemap() {
     } catch (error) {
         showError(`Erro durante a análise: ${error.message}`);
     } finally {
-        hideLoading(analyzeBtn, '📊 Analisar Sitemap');
+        hideLoading(analyzeBtn, '<i class="fas fa-chart-bar mr-2"></i>Analisar Sitemap');
     }
 }
 
@@ -712,7 +712,7 @@ function formatSitemapAnalysis(analysisData) {
 
 function formatUrlComparison(diffs) {
     if (diffs.added.length === 0 && diffs.removed.length === 0 && diffs.modified.length === 0) {
-        return '<span class="result-success">✅ Nenhuma diferença de URLs encontrada</span>';
+        return '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Nenhuma diferença de URLs encontrada</span>';
     }
     
     let html = '<strong>Diferenças de URLs:</strong><br><br>';
@@ -758,7 +758,7 @@ function formatUrlComparison(diffs) {
 
 function formatPriorityComparison(diffs) {
     if (diffs.length === 0) {
-        return '<span class="result-success">✅ Nenhuma diferença de prioridades encontrada</span>';
+        return '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Nenhuma diferença de prioridades encontrada</span>';
     }
     
     let html = `<strong>${diffs.length} diferença(s) de prioridade:</strong><br><br>`;
@@ -779,7 +779,7 @@ function formatPriorityComparison(diffs) {
 
 function formatFrequencyComparison(diffs) {
     if (diffs.length === 0) {
-        return '<span class="result-success">✅ Nenhuma diferença de frequências encontrada</span>';
+        return '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Nenhuma diferença de frequências encontrada</span>';
     }
     
     let html = `<strong>${diffs.length} diferença(s) de frequência:</strong><br><br>`;
@@ -800,7 +800,7 @@ function formatFrequencyComparison(diffs) {
 
 function formatDateComparison(diffs) {
     if (diffs.length === 0) {
-        return '<span class="result-success">✅ Nenhuma diferença de datas encontrada</span>';
+        return '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Nenhuma diferença de datas encontrada</span>';
     }
     
     let html = `<strong>${diffs.length} diferença(s) de data:</strong><br><br>`;
@@ -878,9 +878,9 @@ function showSitemapStatus(url, content) {
     if (parsed.success) {
         info += `• Itens: ${parsed.data.length}<br>`;
         info += `• Tipo: ${parsed.data[0]?.type === 'sitemap' ? 'Sitemap Index' : 'Sitemap de URLs'}<br>`;
-        info += `<span class="result-success">✅ Sitemap válido e processado com sucesso</span>`;
+        info += `<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Sitemap válido e processado com sucesso</span>`;
     } else {
-        info += `<span class="result-error">❌ Erro no parse: ${parsed.error}</span>`;
+        info += `<span class="result-error"><i class="fas fa-exclamation-triangle mr-2"></i>Erro no parse: ${parsed.error}</span>`;
     }
     
     sitemapInfo.innerHTML = info;
@@ -889,9 +889,9 @@ function showSitemapStatus(url, content) {
 
 // Função para inserir sitemap manualmente quando CORS falha
 function showCorsError(url) {
-    let info = `<strong>❌ Erro de CORS detectado:</strong><br><br>`;
+    let info = `<strong><i class="fas fa-exclamation-triangle mr-2"></i>Erro de CORS detectado:</strong><br><br>`;
     info += `O site <strong>${escapeHtml(url)}</strong> bloqueia requisições CORS.<br><br>`;
-    info += `<strong>💡 Soluções:</strong><br>`;
+    info += `<strong><i class="fas fa-lightbulb mr-2"></i>Soluções:</strong><br>`;
     info += `1. <strong>Copie manualmente:</strong> Acesse ${escapeHtml(url)} no seu navegador e cole o conteúdo aqui<br>`;
     info += `2. <strong>Use extensão CORS:</strong> Instale uma extensão como "CORS Unblock"<br>`;
     info += `3. <strong>Proxy local:</strong> Configure um proxy local para desenvolvimento<br><br>`;
@@ -942,7 +942,7 @@ function showManualSitemapDialog() {
             border: 2px solid var(--color-primary);
             box-shadow: var(--shadow-lg);
         ">
-            <h3 style="margin-top: 0; color: var(--color-primary); font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold);">📋 Inserir Sitemap Manualmente</h3>
+            <h3 style="margin-top: 0; color: var(--color-primary); font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold);"><i class="fas fa-clipboard mr-2"></i>Inserir Sitemap Manualmente</h3>
             <p style="color: var(--color-text); margin-bottom: 16px; line-height: var(--line-height-normal);">
                 Quando há bloqueio de CORS, você pode copiar o sitemap manualmente:
             </p>
@@ -1015,10 +1015,10 @@ function showManualSitemapDialog() {
 function showNotification(title, message, type = 'info', duration = 5000) {
     // Define ícone e cores baseado no tipo
     const icons = {
-        'error': '❌',
-        'success': '✅',
-        'warning': '⚠️',
-        'info': 'ℹ️'
+        'error': '<i class="fas fa-exclamation-triangle"></i>',
+        'success': '<i class="fas fa-check-circle"></i>',
+        'warning': '<i class="fas fa-exclamation-triangle"></i>',
+        'info': '<i class="fas fa-info-circle"></i>'
     };
     
     const colors = {
@@ -1292,10 +1292,10 @@ function normalizeTagCase(html) {
 function showNotification(title, message, type = 'info', duration = 5000) {
     // Define ícone e cores baseado no tipo
     const icons = {
-        'error': '❌',
-        'success': '✅',
-        'warning': '⚠️',
-        'info': 'ℹ️'
+        'error': '<i class="fas fa-exclamation-triangle"></i>',
+        'success': '<i class="fas fa-check-circle"></i>',
+        'warning': '<i class="fas fa-exclamation-triangle"></i>',
+        'info': '<i class="fas fa-info-circle"></i>'
     };
     
     const colors = {
@@ -1407,10 +1407,10 @@ function normalizeAttributeOrder(html) {
 function showNotification(title, message, type = 'info', duration = 5000) {
     // Define ícone e cores baseado no tipo
     const icons = {
-        'error': '❌',
-        'success': '✅',
-        'warning': '⚠️',
-        'info': 'ℹ️'
+        'error': '<i class="fas fa-exclamation-triangle"></i>',
+        'success': '<i class="fas fa-check-circle"></i>',
+        'warning': '<i class="fas fa-exclamation-triangle"></i>',
+        'info': '<i class="fas fa-info-circle"></i>'
     };
     
     const colors = {
@@ -1509,7 +1509,7 @@ function previewNormalization() {
     }
     
     if (!normalizeWhitespace.checked && !normalizeAttributes.checked && !ignoreComments.checked && !normalizeCase.checked) {
-        info += '<span class="result-warning">⚠️ Nenhuma opção de normalização está ativa</span>';
+        info += '<span class="result-warning"><i class="fas fa-exclamation-triangle mr-2"></i>Nenhuma opção de normalização está ativa</span>';
     }
     
     normalizationInfo.innerHTML = info;
@@ -1526,7 +1526,7 @@ async function compareHTML() {
         return;
     }
 
-    showLoading(compareHtmlBtn, '🔍 Analisando com Normalização...');
+    showLoading(compareHtmlBtn, '<i class="fas fa-search mr-2"></i>Analisando com Normalização...');
     hideResults();
 
     try {
@@ -1589,7 +1589,7 @@ async function compareHTML() {
     } catch (error) {
         showError(`Erro durante a comparação: ${error.message}`);
     } finally {
-        hideLoading(compareHtmlBtn, 'Comparar HTML com Normalização Inteligente');
+        hideLoading(compareHtmlBtn, '<i class="fas fa-search mr-2"></i>Comparar HTML com Normalização Inteligente');
     }
 }
 
@@ -1614,14 +1614,14 @@ function showNormalizationStatus(normalizedA, normalizedB, originalA, originalB)
     const normalizedEqual = normalizedA === normalizedB;
     
     if (originalEqual && normalizedEqual) {
-        info += '<span class="result-success">✅ Os HTMLs são idênticos (original e normalizado)</span>';
+        info += '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Os HTMLs são idênticos (original e normalizado)</span>';
     } else if (!originalEqual && normalizedEqual) {
-        info += '<span class="result-success">✅ Os HTMLs são estruturalmente idênticos após normalização</span><br>';
-        info += '<span class="result-info">💡 As diferenças detectadas são apenas de formatação (espaços, quebras de linha, etc.)</span>';
+        info += '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Os HTMLs são estruturalmente idênticos após normalização</span><br>';
+        info += '<span class="result-info"><i class="fas fa-lightbulb mr-2"></i>As diferenças detectadas são apenas de formatação (espaços, quebras de linha, etc.)</span>';
     } else if (originalEqual && !normalizedEqual) {
-        info += '<span class="result-warning">⚠️ Situação inesperada: originais iguais mas normalizados diferentes</span>';
+        info += '<span class="result-warning"><i class="fas fa-exclamation-triangle mr-2"></i>Situação inesperada: originais iguais mas normalizados diferentes</span>';
     } else {
-        info += '<span class="result-error">❌ Os HTMLs possuem diferenças estruturais reais</span>';
+        info += '<span class="result-error"><i class="fas fa-exclamation-triangle mr-2"></i>Os HTMLs possuem diferenças estruturais reais</span>';
     }
     
     info += '<br><br><strong>Estatísticas:</strong><br>';
@@ -1842,12 +1842,12 @@ function levenshteinDistance(str1, str2) {
 
 function formatNormalizedComparison(result) {
     if (!result.hasDifference) {
-        return `<span class="result-success">✅ HTMLs são estruturalmente idênticos após normalização</span><br><br>
+        return `<span class="result-success"><i class="fas fa-check-circle mr-2"></i>HTMLs são estruturalmente idênticos após normalização</span><br><br>
                 <strong>Similaridade:</strong> 100%<br>
                 <strong>Status:</strong> <span class="result-success">Conteúdo equivalente</span>`;
     }
 
-    let html = `<span class="result-error">❌ HTMLs possuem diferenças estruturais reais</span><br><br>`;
+    let html = `<span class="result-error"><i class="fas fa-exclamation-triangle mr-2"></i>HTMLs possuem diferenças estruturais reais</span><br><br>`;
     html += `<strong>Similaridade após normalização:</strong> ${result.similarity}%<br>`;
     html += `<strong>Status:</strong> <span class="result-error">Conteúdo diferente</span><br><br>`;
     
@@ -1865,7 +1865,7 @@ function formatNormalizedComparison(result) {
 
 function formatTextComparison(differences) {
     if (differences.length === 0) {
-        return '<span class="result-success">✅ Nenhuma diferença textual encontrada</span>';
+        return '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Nenhuma diferença textual encontrada</span>';
     }
 
     let html = `<strong>${differences.length} linha(s) alterada(s):</strong><br><br>`;
@@ -1890,7 +1890,7 @@ function formatTextComparison(differences) {
 
 function formatDOMComparison(differences) {
     if (differences.length === 0) {
-        return '<span class="result-success">✅ Nenhuma diferença estrutural encontrada pelo DOM Comparator</span>';
+        return '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Nenhuma diferença estrutural encontrada pelo DOM Comparator</span>';
     }
 
     let html = `<strong>${differences.length} operação(ões) detectada(s):</strong><br><br>`;
@@ -1908,7 +1908,7 @@ function formatDOMComparison(differences) {
 
 function formatAttributeComparison(differences) {
     if (differences.length === 0) {
-        return '<span class="result-success">✅ Nenhuma diferença de atributos encontrada</span>';
+        return '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Nenhuma diferença de atributos encontrada</span>';
     }
 
     let html = `<strong>${differences.length} diferença(s) de atributos/estrutura:</strong><br><br>`;
@@ -1933,7 +1933,7 @@ function formatAttributeComparison(differences) {
 
 function formatHashComparison(differences) {
     if (differences.length === 0) {
-        return '<span class="result-success">✅ Conteúdo idêntico confirmado por hash</span>';
+        return '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Conteúdo idêntico confirmado por hash</span>';
     }
 
     let html = `<strong>Diferença detectada por hash:</strong><br><br>`;
@@ -1978,6 +1978,16 @@ function initializeTheme() {
         // Por padrão, sempre inicia com tema claro
         setTheme('light');
     }
+    
+    // Garantir que o ícone inicial esteja correto
+    if (themeIcon) {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        if (currentTheme === 'dark') {
+            themeIcon.className = 'fas fa-sun text-xl';
+        } else {
+            themeIcon.className = 'fas fa-moon text-xl';
+        }
+    }
 }
 
 // Alterna entre tema claro e escuro
@@ -1994,10 +2004,10 @@ function setTheme(theme) {
     
     // Atualiza o ícone do botão
     if (theme === 'dark') {
-        themeIcon.textContent = '☀️';
+        themeIcon.className = 'fas fa-sun text-xl';
         themeToggle.title = 'Alternar para tema claro';
     } else {
-        themeIcon.textContent = '🌙';
+        themeIcon.className = 'fas fa-moon text-xl';
         themeToggle.title = 'Alternar para tema escuro';
     }
     
@@ -2030,10 +2040,10 @@ function applyThemeClasses(theme) {
 function showNotification(title, message, type = 'info', duration = 5000) {
     // Define ícone e cores baseado no tipo
     const icons = {
-        'error': '❌',
-        'success': '✅',
-        'warning': '⚠️',
-        'info': 'ℹ️'
+        'error': '<i class="fas fa-exclamation-triangle"></i>',
+        'success': '<i class="fas fa-check-circle"></i>',
+        'warning': '<i class="fas fa-exclamation-triangle"></i>',
+        'info': '<i class="fas fa-info-circle"></i>'
     };
     
     const colors = {

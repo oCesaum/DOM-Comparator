@@ -722,3 +722,101 @@ body::before {
     font-family: 'FKGroteskNeue';
     src: url('https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2') format('woff2');
 }
+
+/* Estilos para ícones FontAwesome */
+.fas, .far, .fab {
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+}
+
+/* Garantir que os ícones tenham o tamanho correto */
+.fas.text-xl {
+    font-size: 1.25rem;
+}
+
+.fas.text-2xl {
+    font-size: 1.5rem;
+}
+
+.fas.text-3xl {
+    font-size: 1.875rem;
+}
+
+/* Espaçamento para ícones com margem */
+.fas.mr-2 {
+    margin-right: 0.5rem;
+}
+
+.fas.mr-3 {
+    margin-right: 0.75rem;
+}
+
+.fas.mr-4 {
+    margin-right: 1rem;
+}
+
+/* Cores para ícones */
+.fas.text-primary {
+    color: #3b82f6;
+}
+
+.fas.text-white {
+    color: #ffffff;
+}
+
+/* Transições suaves para ícones */
+.fas {
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* Hover effects para ícones em botões */
+button:hover .fas {
+    transform: scale(1.1);
+}
+
+/* Ícones em tema escuro */
+[data-theme="dark"] .fas.text-primary {
+    color: #3b82f6 !important;
+}
+
+[data-theme="dark"] .fas.text-white {
+    color: #ffffff !important;
+}
+
+/* Estilos específicos para o botão de tema */
+#themeToggle {
+    position: relative;
+    overflow: hidden;
+    z-index: 50;
+}
+
+#themeIcon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+#themeToggle:hover #themeIcon {
+    transform: scale(1.1) rotate(15deg);
+}
+
+/* Garantir que apenas um ícone seja exibido por vez */
+#themeIcon.fa-moon {
+    display: inline-block;
+}
+
+#themeIcon.fa-sun {
+    display: inline-block;
+}
+
+/* Animação suave para troca de ícones */
+#themeIcon {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Garantir que o container do botão de tema tenha prioridade */
+.absolute.top-6.right-6 {
+    z-index: 50 !important;
+}
