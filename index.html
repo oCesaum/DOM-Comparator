@@ -3,302 +3,384 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sitemap Comparator Robot - Comparação de Sitemaps</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // Paleta moderna inspirada no Tailwind CSS - TEMA CLARO (padrão)
+                        'primary': '#3b82f6',
+                        'primary-hover': '#2563eb',
+                        'primary-active': '#1d4ed8',
+                        'secondary': '#f1f5f9',
+                        'secondary-hover': '#e2e8f0',
+                        'secondary-active': '#cbd5e1',
+                        'surface': '#ffffff',
+                        'surface-light': '#f8fafc',
+                        'background': '#fcfcf9',
+                        'background-pattern': '#f8fafc',
+                        'text': '#1e293b',
+                        'text-secondary': '#475569',
+                        'text-muted': '#475569',
+                        'border': '#e2e8f0',
+                        'border-light': '#cbd5e1',
+                        'accent': '#06b6d4',
+                        'accent-hover': '#0891b2',
+                        'error': '#ef4444',
+                        'success': '#10b981',
+                        'warning': '#f59e0b',
+                        'info': '#3b82f6'
+                    },
+                    fontFamily: {
+                        'base': ['"FKGroteskNeue"', '"Geist"', '"Inter"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                        'mono': ['"Berkeley Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+                    },
+                    animation: {
+                        'header-slide-in': 'headerSlideIn 0.3s ease-out',
+                        'title-fade-in': 'titleFadeIn 0.3s ease-out 0.05s both',
+                        'subtitle-fade-in': 'subtitleFadeIn 0.3s ease-out 0.1s both',
+                        'badge-slide-in': 'badgeSlideIn 0.4s ease-out 0.2s both',
+                        'section-slide-in': 'sectionSlideIn 0.4s ease-out 0.2s forwards',
+                        'card-slide-in': 'cardSlideIn 0.3s ease-out forwards',
+                        'shimmer': 'shimmer 3s infinite',
+                        'spin': 'spin 1.5s linear infinite',
+                        'dots': 'dots 2s infinite',
+                        'pulse': 'pulse 3s infinite',
+                        'fade-in': 'fadeIn 0.3s ease-in'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="styles-tailwind.css">
     
     <!-- Dependências -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
 </head>
-<body>
-    <div class="container">
-        <header class="header">
-            <h1>🔧 DOM Comparator Universal</h1>
-            <p>Ferramenta completa para comparação de sitemaps e HTML com normalização inteligente</p>
-            <div class="feature-badge">
-                <span class="badge">✨ NOVO: Comparação automática de sitemaps</span>
+<body class="font-base bg-background text-text min-h-screen p-5 relative">
+    <!-- Padrão de fundo sutil -->
+    <div class="fixed inset-0 bg-gradient-to-br from-background via-background-pattern to-background opacity-50 pointer-events-none"></div>
+    <div class="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)] pointer-events-none"></div>
+    
+    <div class="relative max-w-7xl mx-auto bg-surface rounded-2xl shadow-2xl overflow-hidden border border-border">
+        <header class="bg-gradient-to-br from-primary via-primary-hover to-primary-active text-white text-center p-12 relative overflow-hidden animate-header-slide-in">
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+            
+            <!-- Botão Toggle de Tema -->
+            <div class="absolute top-6 right-6">
+                <button id="themeToggle" class="bg-white/10 text-white p-3 rounded-xl border border-white/20 backdrop-blur-sm hover:bg-white/20 hover:border-white/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50 hover:scale-102" title="Alternar para tema escuro">
+                    <span id="themeIcon" class="text-xl">🌙</span>
+                </button>
+            </div>
+            
+            <h1 class="text-6xl font-bold mb-6 animate-title-fade-in tracking-tight">🔧 DOM Comparator Universal</h1>
+            <p class="text-xl opacity-90 mb-8 animate-subtitle-fade-in max-w-4xl mx-auto leading-relaxed">Ferramenta completa para comparação de sitemaps e HTML com normalização inteligente</p>
+            <div class="mt-6 animate-badge-slide-in">
+                <span class="bg-white/10 text-white px-6 py-3 rounded-full text-sm font-medium border border-white/20 backdrop-blur-sm inline-block hover:bg-white/20 transition-all duration-200">✨ NOVO: Comparação automática de sitemaps</span>
             </div>
             
             <!-- Seletor de Modo -->
-            <div class="mode-selector">
-                <label class="mode-toggle">
-                    <input type="radio" name="comparatorMode" value="sitemap" checked>
-                    <span class="mode-option">
-                        <span class="mode-icon">🤖</span>
-                        <span class="mode-label">Sitemap</span>
+            <div class="flex justify-center gap-4 mt-8">
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="comparatorMode" value="sitemap" checked class="absolute opacity-0 cursor-pointer">
+                    <span class="flex items-center gap-3 px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white font-medium transition-all duration-200 backdrop-blur-sm hover:bg-white/20 hover:border-white/30 hover:scale-102 hover:shadow-lg">
+                        <span class="text-xl">🤖</span>
+                        <span class="text-lg">Sitemap</span>
                     </span>
                 </label>
-                <label class="mode-toggle">
-                    <input type="radio" name="comparatorMode" value="html">
-                    <span class="mode-option">
-                        <span class="mode-icon">🔧</span>
-                        <span class="mode-label">HTML</span>
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="comparatorMode" value="html" class="absolute opacity-0 cursor-pointer">
+                    <span class="flex items-center gap-3 px-6 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white font-medium transition-all duration-200 backdrop-blur-sm hover:bg-white/20 hover:border-white/30 hover:scale-102 hover:shadow-lg">
+                        <span class="text-xl">🔧</span>
+                        <span class="text-lg">HTML</span>
                     </span>
                 </label>
             </div>
         </header>
 
-        <div class="content">
+        <div class="p-10">
             <!-- Configuração do Site -->
-            <section class="site-config-section">
-                <h2>🌐 Configuração do Site</h2>
-                <div class="site-input-group">
-                    <div class="form-group">
-                        <label for="siteUrl" class="form-label">URL do Site:</label>
-                        <input type="url" id="siteUrl" class="form-control" placeholder="https://exemplo.com" required>
+            <section class="bg-surface-light p-8 rounded-2xl mb-10 border border-border opacity-0 transform -translate-x-8 animate-section-slide-in hover:border-border-light transition-all duration-200">
+                <h2 class="text-primary mb-6 text-3xl font-bold">🌐 Configuração do Site</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="mb-6">
+                        <label for="siteUrl" class="block mb-3 font-semibold text-base text-text">URL do Site:</label>
+                        <input type="url" id="siteUrl" class="block w-full px-4 py-3 text-base text-text bg-surface border border-border rounded-xl transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-0.5 focus:shadow-xl hover:border-border-light" placeholder="https://exemplo.com" required>
                     </div>
-                    <div class="form-group">
-                        <label for="sitemapUrl" class="form-label">URL do Sitemap (opcional):</label>
-                        <input type="url" id="sitemapUrl" class="form-control" placeholder="https://exemplo.com/sitemap.xml">
-                        <small class="form-text">Deixe vazio para buscar automaticamente</small>
+                    <div class="mb-6">
+                        <label for="sitemapUrl" class="block mb-3 font-semibold text-base text-text">URL do Sitemap (opcional):</label>
+                        <input type="url" id="sitemapUrl" class="block w-full px-4 py-3 text-base text-text bg-surface border border-border rounded-xl transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-0.5 focus:shadow-xl hover:border-border-light" placeholder="https://exemplo.com/sitemap.xml">
+                        <small class="text-text-muted text-sm mt-2 block">Deixe vazio para buscar automaticamente</small>
                     </div>
                 </div>
-                <div class="site-actions">
-                    <button id="fetchSitemapBtn" class="btn btn--primary btn--large">
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button id="fetchSitemapBtn" class="inline-flex items-center justify-center px-8 py-4 bg-primary text-white rounded-xl font-bold text-lg transition-all duration-200 hover:bg-primary-hover hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
                         🔍 Buscar Sitemap
                     </button>
-                    <button id="compareWithSelfBtn" class="btn btn--highlight btn--large">
+                    <button id="compareWithSelfBtn" class="inline-flex items-center justify-center px-8 py-4 bg-success text-white rounded-xl font-bold text-lg transition-all duration-200 hover:bg-success/90 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-success/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
                         🔄 Comparar Consigo Mesmo
                     </button>
-                    <button id="manualSitemapBtn" class="btn btn--outline btn--large">
+                    <button id="manualSitemapBtn" class="inline-flex items-center justify-center px-8 py-4 bg-transparent text-accent border-2 border-accent rounded-xl font-bold text-lg transition-all duration-200 hover:bg-accent/10 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-accent/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
                         📋 Inserir Manualmente
                     </button>
                 </div>
             </section>
 
             <!-- Interface do Comparador HTML (oculta por padrão) -->
-            <div id="htmlComparatorInterface" class="html-comparator-interface hidden">
+            <div id="htmlComparatorInterface" class="transition-all duration-250 hidden">
                 <!-- Exemplos -->
-                <section class="examples-section">
-                    <h2>Exemplos Pré-definidos</h2>
-                    <div class="examples-grid">
-                        <button class="btn btn--secondary" onclick="loadExample('estilo')">
+                <section class="mb-10">
+                    <h2 class="text-primary mb-6 text-3xl font-bold">Exemplos Pré-definidos</h2>
+                    <div class="flex flex-wrap gap-4 mb-10">
+                        <button class="inline-flex items-center justify-center px-6 py-3 bg-surface-light text-primary border-2 border-primary rounded-xl font-semibold transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40 hover:scale-102" onclick="loadExample('estilo')">
                             Exemplo: Mudança de Estilo
                         </button>
-                        <button class="btn btn--secondary" onclick="loadExample('texto')">
+                        <button class="inline-flex items-center justify-center px-6 py-3 bg-surface-light text-primary border-2 border-primary rounded-xl font-semibold transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40 hover:scale-102" onclick="loadExample('texto')">
                             Exemplo: Mudança de Texto
                         </button>
-                        <button class="btn btn--secondary" onclick="loadExample('atributo')">
+                        <button class="inline-flex items-center justify-center px-6 py-3 bg-surface-light text-primary border-2 border-primary rounded-xl font-semibold transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40 hover:scale-102" onclick="loadExample('atributo')">
                             Exemplo: Mudança de Atributo
                         </button>
-                        <button class="btn btn--secondary" onclick="loadExample('estrutura')">
+                        <button class="inline-flex items-center justify-center px-6 py-3 bg-surface-light text-primary border-2 border-primary rounded-xl font-semibold transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40 hover:scale-102" onclick="loadExample('estrutura')">
                             Exemplo: Mudança de Estrutura
                         </button>
-                        <button class="btn btn--highlight" onclick="loadExample('formatacao')">
+                        <button class="inline-flex items-center justify-center px-6 py-3 bg-success text-white rounded-xl font-bold transition-all duration-200 hover:bg-success/90 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-success/40 hover:scale-105" onclick="loadExample('formatacao')">
                             🆕 Exemplo: Formatação Diferente
                         </button>
-                        <button class="btn btn--outline" onclick="clearFields()">
+                        <button class="inline-flex items-center justify-center px-6 py-3 bg-transparent text-warning border-2 border-warning rounded-xl font-semibold transition-all duration-200 hover:bg-warning/10 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-warning/40 hover:scale-105" onclick="clearFields()">
                             Limpar Campos
                         </button>
                     </div>
                 </section>
 
                 <!-- Controles de Normalização -->
-                <section class="normalization-section">
-                    <h3>Opções de Normalização</h3>
-                    <div class="options-grid">
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="normalizeWhitespace" checked>
-                            <span class="checkmark"></span>
-                            <span class="label-text">Normalizar espaços em branco e quebras de linha</span>
+                <section class="bg-surface-light p-8 rounded-2xl mb-10 border border-border opacity-0 transform -translate-x-8 animate-section-slide-in hover:border-border-light transition-all duration-200">
+                    <h3 class="text-primary mb-6 text-2xl font-bold">Opções de Normalização</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <label class="flex items-center cursor-pointer relative pl-12 text-base select-none group">
+                            <input type="checkbox" id="normalizeWhitespace" checked class="absolute opacity-0 cursor-pointer h-0 w-0">
+                            <span class="absolute top-0 left-0 h-6 w-6 bg-surface rounded-lg border-2 border-border transition-all duration-200 hover:bg-surface-light group-hover:border-primary"></span>
+                            <span class="ml-3 text-text-secondary font-semibold group-hover:text-text transition-colors duration-300">Normalizar espaços em branco e quebras de linha</span>
                         </label>
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="normalizeAttributes" checked>
-                            <span class="checkmark"></span>
-                            <span class="label-text">Ordenar atributos alfabeticamente</span>
+                        <label class="flex items-center cursor-pointer relative pl-12 text-base select-none group">
+                            <input type="checkbox" id="normalizeAttributes" checked class="absolute opacity-0 cursor-pointer h-0 w-0">
+                            <span class="absolute top-0 left-0 h-6 w-6 bg-surface rounded-lg border-2 border-border transition-all duration-200 hover:bg-surface-light group-hover:border-primary"></span>
+                            <span class="ml-3 text-text-secondary font-semibold group-hover:text-text transition-colors duration-300">Ordenar atributos alfabeticamente</span>
                         </label>
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="ignoreComments" checked>
-                            <span class="checkmark"></span>
-                            <span class="label-text">Ignorar comentários HTML</span>
+                        <label class="flex items-center cursor-pointer relative pl-12 text-base select-none group">
+                            <input type="checkbox" id="ignoreComments" checked class="absolute opacity-0 cursor-pointer h-0 w-0">
+                            <span class="absolute top-0 left-0 h-6 w-6 bg-surface rounded-lg border-2 border-border transition-all duration-200 hover:bg-surface-light group-hover:border-primary"></span>
+                            <span class="ml-3 text-text-secondary font-semibold group-hover:text-text transition-colors duration-300">Ignorar comentários HTML</span>
                         </label>
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="normalizeCase" checked>
-                            <span class="checkmark"></span>
-                            <span class="label-text">Normalizar maiúsculas/minúsculas de tags</span>
+                        <label class="flex items-center cursor-pointer relative pl-12 text-base select-none group">
+                            <input type="checkbox" id="normalizeCase" checked class="absolute opacity-0 cursor-pointer h-0 w-0">
+                            <span class="absolute top-0 left-0 h-6 w-6 bg-surface rounded-lg border-2 border-border transition-all duration-200 hover:bg-surface-light group-hover:border-primary"></span>
+                            <span class="ml-3 text-text-secondary font-semibold group-hover:text-text transition-colors duration-300">Normalizar maiúsculas/minúsculas de tags</span>
                         </label>
                     </div>
                 </section>
 
                 <!-- Áreas de HTML -->
-                <div class="html-grid">
-                    <div class="html-column">
-                        <h3>HTML A (Original) *</h3>
-                        <textarea id="htmlA" placeholder="Cole aqui o código HTML original..."></textarea>
-                        <div class="normalized-preview">
-                            <h4>Prévia Normalizada:</h4>
-                            <pre id="normalizedA" class="normalized-code"></pre>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                    <div class="bg-surface-light p-6 rounded-2xl border border-border hover:border-border-light transition-all duration-200">
+                        <h3 class="text-primary mb-4 text-2xl font-bold">HTML A (Original) *</h3>
+                        <textarea id="htmlA" class="w-full h-56 p-4 border-2 border-border rounded-xl font-mono text-sm leading-relaxed transition-all duration-200 mb-6 bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-1 focus:shadow-xl hover:border-border-light" placeholder="Cole aqui o código HTML original..."></textarea>
+                        <div class="bg-surface rounded-xl p-4 border border-border">
+                            <h4 class="text-text-secondary text-sm mb-3 uppercase tracking-wide font-semibold">Prévia Normalizada:</h4>
+                            <pre id="normalizedA" class="bg-surface border border-border rounded-lg text-sm p-3 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap text-text font-mono"></pre>
                         </div>
                     </div>
-                    <div class="html-column">
-                        <h3>HTML B (Modificado) *</h3>
-                        <textarea id="htmlB" placeholder="Cole aqui o código HTML modificado..."></textarea>
-                        <div class="normalized-preview">
-                            <h4>Prévia Normalizada:</h4>
-                            <pre id="normalizedB" class="normalized-code"></pre>
+                    <div class="bg-surface-light p-6 rounded-2xl border border-border hover:border-border-light transition-all duration-200">
+                        <h3 class="text-primary mb-4 text-2xl font-bold">HTML B (Modificado) *</h3>
+                        <textarea id="htmlB" class="w-full h-56 p-4 border-2 border-border rounded-xl font-mono text-sm leading-relaxed transition-all duration-200 mb-6 bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-1 focus:shadow-xl hover:border-border-light" placeholder="Cole aqui o código HTML modificado..."></textarea>
+                        <div class="bg-surface rounded-xl p-4 border border-border">
+                            <h4 class="text-text-secondary text-sm mb-3 uppercase tracking-wide font-semibold">Prévia Normalizada:</h4>
+                            <pre id="normalizedB" class="bg-surface border border-border rounded-lg text-sm p-3 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap text-text font-mono"></pre>
                         </div>
                     </div>
                 </div>
 
                 <!-- Botões de Comparação HTML -->
-                <section class="compare-section">
-                    <button id="compareHtmlBtn" class="btn btn--primary btn--large">
+                <section class="text-center my-10">
+                    <button id="compareHtmlBtn" class="inline-flex items-center justify-center px-10 py-5 bg-primary text-white rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary-hover hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
                         Comparar HTML com Normalização Inteligente
                     </button>
-                    <button id="previewBtn" class="btn btn--secondary btn--large">
+                    <button id="previewBtn" class="inline-flex items-center justify-center px-10 py-5 bg-surface-light text-primary border-2 border-primary rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary/10 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102 ml-6">
                         Prévia da Normalização
                     </button>
                 </section>
 
                 <!-- Status da Normalização -->
-                <section id="normalizationStatus" class="status-section hidden">
-                    <div class="status-header">
-                        <span class="status-icon">📋</span>
-                        <h3>Status da Normalização</h3>
+                <section id="normalizationStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-3">📋</span>
+                        <h3 class="text-xl font-bold text-text">Status da Normalização</h3>
                     </div>
-                    <div id="normalizationInfo" class="status-info"></div>
+                    <div id="normalizationInfo" class="text-base text-text-secondary leading-relaxed"></div>
                 </section>
             </div>
 
             <!-- Status do Sitemap -->
-            <section id="sitemapStatus" class="status-section hidden">
-                <div class="status-header">
-                    <span class="status-icon">📋</span>
-                    <h3>Status do Sitemap</h3>
+            <section id="sitemapStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3">📋</span>
+                    <h3 class="text-xl font-bold text-text">Status do Sitemap</h3>
                 </div>
-                <div id="sitemapInfo" class="status-info"></div>
+                <div id="sitemapInfo" class="text-base text-text-secondary leading-relaxed"></div>
             </section>
 
             <!-- Áreas de Sitemap -->
-            <div class="sitemap-grid">
-                <div class="sitemap-column">
-                    <h3>Sitemap A (Original) *</h3>
-                    <textarea id="sitemapA" placeholder="Cole aqui o sitemap original ou deixe o robô buscar..."></textarea>
-                    <div class="sitemap-preview">
-                        <h4>Prévia do Sitemap:</h4>
-                        <pre id="previewA" class="sitemap-code"></pre>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <div class="bg-surface-light p-6 rounded-2xl border border-border hover:border-border-light transition-all duration-200">
+                    <h3 class="text-primary mb-4 text-2xl font-bold">Sitemap A (Original) *</h3>
+                    <textarea id="sitemapA" class="w-full h-56 p-4 border-2 border-border rounded-xl font-mono text-sm leading-relaxed transition-all duration-200 mb-6 bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-1 focus:shadow-xl hover:border-border-light" placeholder="Cole aqui o sitemap original ou deixe o robô buscar..."></textarea>
+                    <div class="bg-surface rounded-xl p-4 border border-border">
+                        <h4 class="text-text-secondary text-sm mb-3 uppercase tracking-wide font-semibold">Prévia do Sitemap:</h4>
+                        <pre id="previewA" class="bg-surface border border-border rounded-lg text-sm p-3 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap text-text font-mono"></pre>
                     </div>
                 </div>
-                <div class="sitemap-column">
-                    <h3>Sitemap B (Comparação) *</h3>
-                    <textarea id="sitemapB" placeholder="Cole aqui o sitemap para comparação..."></textarea>
-                    <div class="sitemap-preview">
-                        <h4>Prévia do Sitemap:</h4>
-                        <pre id="previewB" class="sitemap-code"></pre>
+                <div class="bg-surface-light p-6 rounded-2xl border border-border hover:border-border-light transition-all duration-200">
+                    <h3 class="text-primary mb-4 text-2xl font-bold">Sitemap B (Comparação) *</h3>
+                    <textarea id="sitemapB" class="w-full h-56 p-4 border-2 border-border rounded-xl font-mono text-sm leading-relaxed transition-all duration-200 mb-6 bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-1 focus:shadow-xl hover:border-border-light" placeholder="Cole aqui o sitemap para comparação..."></textarea>
+                    <div class="bg-surface rounded-xl p-4 border border-border">
+                        <h4 class="text-text-secondary text-sm mb-3 uppercase tracking-wide font-semibold">Prévia do Sitemap:</h4>
+                        <pre id="previewB" class="bg-surface border border-border rounded-lg text-sm p-3 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap text-text font-mono"></pre>
                     </div>
                 </div>
             </div>
 
 
             <!-- Botão Comparar -->
-            <section class="compare-section">
-                <button id="compareBtn" class="btn btn--primary btn--large">
+            <section class="text-center my-10">
+                <button id="compareBtn" class="inline-flex items-center justify-center px-10 py-5 bg-primary text-white rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary-hover hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
                     🔍 Comparar Sitemaps
                 </button>
-                <button id="analyzeBtn" class="btn btn--secondary btn--large">
+                <button id="analyzeBtn" class="inline-flex items-center justify-center px-10 py-5 bg-surface-light text-primary border-2 border-primary rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary/10 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102 ml-6">
                     📊 Analisar Sitemap
                 </button>
             </section>
 
             <!-- Status da Análise -->
-            <section id="analysisStatus" class="status-section hidden">
-                <div class="status-header">
-                    <span class="status-icon">📊</span>
-                    <h3>Status da Análise</h3>
+            <section id="analysisStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3">📊</span>
+                    <h3 class="text-xl font-bold text-text">Status da Análise</h3>
                 </div>
-                <div id="analysisInfo" class="status-info"></div>
+                <div id="analysisInfo" class="text-base text-text-secondary leading-relaxed"></div>
             </section>
 
             <!-- Resultados -->
-            <section id="resultSection" class="results-section hidden">
-                <div class="results-header">
-                    <span id="operationCount" class="operation-count">0 diferenças</span>
-                    <h3>Análise Completa dos Sitemaps</h3>
+            <section id="resultSection" class="mt-10 p-8 bg-surface-light rounded-2xl border border-border hidden hover:border-border-light transition-all duration-200">
+                <div class="flex items-center mb-8">
+                    <span id="operationCount" class="bg-primary text-white px-6 py-3 rounded-full font-bold mr-6 text-lg">0 diferenças</span>
+                    <h3 class="text-2xl font-bold text-text">Análise Completa dos Sitemaps</h3>
                 </div>
                 
-                <div class="comparison-methods">
+                <div class="space-y-6 mb-10">
                     <!-- Métodos do Comparador de Sitemap -->
-                    <div id="sitemapMethods">
+                    <div id="sitemapMethods" class="space-y-6">
                         <!-- Método 1: Comparação de URLs -->
-                        <div class="method-card method-card--primary">
-                            <h4>🔗 Comparação de URLs</h4>
-                            <p>Detecta URLs adicionadas, removidas ou modificadas no sitemap.</p>
-                            <div id="urlResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-primary transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-primary-hover">
+                            <h4 class="text-primary font-bold mb-4 text-xl">🔗 Comparação de URLs</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Detecta URLs adicionadas, removidas ou modificadas no sitemap.</p>
+                            <div id="urlResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 2: Análise de Prioridades -->
-                        <div class="method-card">
-                            <h4>⭐ Análise de Prioridades</h4>
-                            <p>Compara valores de prioridade (priority) entre os sitemaps.</p>
-                            <div id="priorityResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
+                            <h4 class="text-text font-bold mb-4 text-xl">⭐ Análise de Prioridades</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Compara valores de prioridade (priority) entre os sitemaps.</p>
+                            <div id="priorityResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 3: Análise de Frequências -->
-                        <div class="method-card">
-                            <h4>🔄 Análise de Frequências</h4>
-                            <p>Detecta mudanças nas frequências de atualização (changefreq).</p>
-                            <div id="frequencyResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
+                            <h4 class="text-text font-bold mb-4 text-xl">🔄 Análise de Frequências</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Detecta mudanças nas frequências de atualização (changefreq).</p>
+                            <div id="frequencyResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 4: Análise de Datas -->
-                        <div class="method-card">
-                            <h4>📅 Análise de Datas</h4>
-                            <p>Compara datas de última modificação (lastmod) entre os sitemaps.</p>
-                            <div id="dateResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
+                            <h4 class="text-text font-bold mb-4 text-xl">📅 Análise de Datas</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Compara datas de última modificação (lastmod) entre os sitemaps.</p>
+                            <div id="dateResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 5: Estatísticas Gerais -->
-                        <div class="method-card">
-                            <h4>📊 Estatísticas Gerais</h4>
-                            <p>Mostra estatísticas comparativas dos dois sitemaps.</p>
-                            <div id="statsResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
+                            <h4 class="text-text font-bold mb-4 text-xl">📊 Estatísticas Gerais</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Mostra estatísticas comparativas dos dois sitemaps.</p>
+                            <div id="statsResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
                     </div>
 
                     <!-- Métodos do Comparador HTML -->
-                    <div id="htmlMethods" class="hidden">
+                    <div id="htmlMethods" class="hidden space-y-6">
                         <!-- Método 1: Comparação Normalizada -->
-                        <div class="method-card method-card--primary">
-                            <h4>🎯 Comparação Normalizada</h4>
-                            <p>Compara HTML após normalização, ignorando formatação irrelevante.</p>
-                            <div id="normalizedResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-primary transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-primary-hover">
+                            <h4 class="text-primary font-bold mb-4 text-xl">🎯 Comparação Normalizada</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Compara HTML após normalização, ignorando formatação irrelevante.</p>
+                            <div id="normalizedResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 2: Comparação Textual Original -->
-                        <div class="method-card">
-                            <h4>🔤 Comparação Textual Original</h4>
-                            <p>Compara o código como texto puro, detectando qualquer mudança.</p>
-                            <div id="textResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
+                            <h4 class="text-text font-bold mb-4 text-xl">🔤 Comparação Textual Original</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Compara o código como texto puro, detectando qualquer mudança.</p>
+                            <div id="textResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 3: DOM Comparator Original -->
-                        <div class="method-card">
-                            <h4>🔧 DOM Comparator (Wingify)</h4>
-                            <p>Análise estrutural usando a biblioteca original da Wingify.</p>
-                            <div id="domResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
+                            <h4 class="text-text font-bold mb-4 text-xl">🔧 DOM Comparator (Wingify)</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Análise estrutural usando a biblioteca original da Wingify.</p>
+                            <div id="domResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 4: Análise de Atributos -->
-                        <div class="method-card">
-                            <h4>📝 Análise de Atributos e Estilos</h4>
-                            <p>Detecta especificamente mudanças em atributos, classes e estilos.</p>
-                            <div id="attributeResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
+                            <h4 class="text-text font-bold mb-4 text-xl">📝 Análise de Atributos e Estilos</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Detecta especificamente mudanças em atributos, classes e estilos.</p>
+                            <div id="attributeResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
                         <!-- Método 5: Comparação Hash -->
-                        <div class="method-card">
-                            <h4>🔐 Comparação por Hash</h4>
-                            <p>Gera hash único para cada elemento e detecta diferenças.</p>
-                            <div id="hashResult" class="method-result"></div>
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-border transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-border-light">
+                            <h4 class="text-text font-bold mb-4 text-xl">🔐 Comparação por Hash</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Gera hash único para cada elemento e detecta diferenças.</p>
+                            <div id="hashResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Seção de Erro -->
-            <section id="errorSection" class="results-section error-section hidden">
-                <h3>❌ Erro na Comparação</h3>
-                <p id="errorMessage"></p>
+            <!-- Seção de Erro (mantida para compatibilidade, mas não será usada) -->
+            <section id="errorSection" class="mt-10 p-8 bg-surface-light rounded-2xl border-l-4 border-error hidden hover:border-border-light transition-all duration-200">
+                <h3 class="text-error font-bold text-xl mb-4">❌ Erro na Comparação</h3>
+                <p id="errorMessage" class="text-text-secondary leading-relaxed"></p>
             </section>
+        </div>
+    </div>
+
+    <!-- Popup de Notificação -->
+    <div id="notificationPopup" class="fixed bottom-4 right-4 z-50 transform translate-x-full opacity-0 transition-all duration-200 ease-in-out">
+        <div class="bg-surface-light border border-border rounded-2xl shadow-2xl p-6 max-w-sm">
+            <div class="flex items-start gap-4">
+                <div id="notificationIcon" class="text-2xl flex-shrink-0">❌</div>
+                <div class="flex-1">
+                    <h4 id="notificationTitle" class="font-bold text-lg mb-2 text-text">Erro</h4>
+                    <p id="notificationMessage" class="text-text-secondary text-sm leading-relaxed"></p>
+                </div>
+                <button id="closeNotification" class="text-text-secondary hover:text-text transition-colors duration-200 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
 

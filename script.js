@@ -25,6 +25,8 @@ let sitemapATextarea, sitemapBTextarea, compareBtn, analyzeBtn;
 let resultSection, errorSection, operationCount, sitemapStatus, analysisStatus;
 let urlResult, priorityResult, frequencyResult, dateResult, statsResult;
 let errorMessage, sitemapInfo, analysisInfo, previewA, previewB;
+let themeToggle, themeIcon;
+let notificationPopup, notificationIcon, notificationTitle, notificationMessage, closeNotification;
 
 // Elementos DOM do Comparador HTML
 let htmlComparatorInterface, htmlATextarea, htmlBTextarea, compareHtmlBtn, previewBtn;
@@ -73,6 +75,17 @@ function initializeElements() {
     analysisInfo = document.getElementById('analysisInfo');
     previewA = document.getElementById('previewA');
     previewB = document.getElementById('previewB');
+    
+    // Elementos do tema
+    themeToggle = document.getElementById('themeToggle');
+    themeIcon = document.getElementById('themeIcon');
+    
+    // Elementos do popup de notificação
+    notificationPopup = document.getElementById('notificationPopup');
+    notificationIcon = document.getElementById('notificationIcon');
+    notificationTitle = document.getElementById('notificationTitle');
+    notificationMessage = document.getElementById('notificationMessage');
+    closeNotification = document.getElementById('closeNotification');
     
     // Elementos do Comparador HTML
     htmlComparatorInterface = document.getElementById('htmlComparatorInterface');
@@ -137,8 +150,27 @@ function setupEventListeners() {
         radio.addEventListener('change', switchComparatorMode);
     });
     
+    // Evento do toggle de tema
+    themeToggle.addEventListener('click', toggleTheme);
+    
+    // Evento do botão de fechar notificação
+    closeNotification.addEventListener('click', hideNotification);
+    
+    // Inicializa o tema
+    initializeTheme();
+    
+    // Listener para mudanças na preferência do sistema
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            setTheme(e.matches ? 'dark' : 'light');
+        }
+    });
+    
     // Carrega DOM Comparator
     loadDOMComparator();
+    
+    // Inicializa o modo correto
+    switchComparatorMode();
 }
 
 // FUNÇÕES PRINCIPAIS DO ROBÔ DE SITEMAP
@@ -262,7 +294,7 @@ async function compareSitemaps() {
         operationCount.textContent = `${totalDiffs} diferença${totalDiffs !== 1 ? 's' : ''} encontrada${totalDiffs !== 1 ? 's' : ''}`;
         
         resultSection.classList.remove('hidden');
-        resultSection.classList.add('fade-in');
+        resultSection.classList.add('animate-fade-in');
 
     } catch (error) {
         showError(`Erro durante a comparação: ${error.message}`);
@@ -828,11 +860,13 @@ function formatStatsComparison(stats) {
 function showLoading(button, text) {
     button.innerHTML = `<div class="loading"></div>${text}`;
     button.disabled = true;
+    button.classList.add('opacity-50', 'cursor-not-allowed');
 }
 
 function hideLoading(button, originalText) {
     button.innerHTML = originalText;
     button.disabled = false;
+    button.classList.remove('opacity-50', 'cursor-not-allowed');
 }
 
 function showSitemapStatus(url, content) {
@@ -973,14 +1007,73 @@ function showManualSitemapDialog() {
     });
 }
 
+// ========================================
+// SISTEMA DE NOTIFICAÇÕES
+// ========================================
+
+// Mostra notificação no canto inferior direito
+function showNotification(title, message, type = 'info', duration = 5000) {
+    // Define ícone e cores baseado no tipo
+    const icons = {
+        'error': '❌',
+        'success': '✅',
+        'warning': '⚠️',
+        'info': 'ℹ️'
+    };
+    
+    const colors = {
+        'error': 'border-error',
+        'success': 'border-success',
+        'warning': 'border-warning',
+        'info': 'border-info'
+    };
+    
+    // Atualiza conteúdo da notificação
+    notificationIcon.textContent = icons[type] || icons.info;
+    notificationTitle.textContent = title;
+    notificationMessage.textContent = message;
+    
+    // Aplica cor da borda baseada no tipo
+    const popupContent = notificationPopup.querySelector('.bg-surface-light');
+    popupContent.className = popupContent.className.replace(/border-\w+/, '');
+    popupContent.classList.add('border', colors[type] || colors.info);
+    
+    // Mostra a notificação
+    notificationPopup.classList.remove('translate-x-full', 'opacity-0');
+    notificationPopup.classList.add('translate-x-0', 'opacity-100');
+    
+    // Auto-hide após duração especificada
+    setTimeout(() => {
+        hideNotification();
+    }, duration);
+}
+
+// Esconde a notificação
+function hideNotification() {
+    notificationPopup.classList.remove('translate-x-0', 'opacity-100');
+    notificationPopup.classList.add('translate-x-full', 'opacity-0');
+}
+
+// Funções de conveniência para diferentes tipos de notificação
+function showSuccess(title, message, duration = 3000) {
+    showNotification(title, message, 'success', duration);
+}
+
+function showWarning(title, message, duration = 4000) {
+    showNotification(title, message, 'warning', duration);
+}
+
+function showInfo(title, message, duration = 4000) {
+    showNotification(title, message, 'info', duration);
+}
+
 function showAnalysisStatus(analysis) {
     analysisInfo.innerHTML = analysis;
     analysisStatus.classList.remove('hidden');
 }
 
 function showError(message) {
-    errorMessage.textContent = message;
-    errorSection.classList.remove('hidden');
+    showNotification('Erro', message, 'error');
 }
 
 function escapeHtml(text) {
@@ -1047,12 +1140,34 @@ const htmlExamples = {
 // Alterna entre modos de comparação
 function switchComparatorMode() {
     const selectedMode = document.querySelector('input[name="comparatorMode"]:checked').value;
+    console.log('Alternando para modo:', selectedMode);
     
     if (selectedMode === 'sitemap') {
-        // Mostra interface do sitemap
-        document.querySelector('.site-config-section').style.display = 'block';
-        document.querySelector('.sitemap-grid').style.display = 'grid';
-        document.querySelector('.compare-section').style.display = 'block';
+        // Mostra interface do sitemap - seção de configuração
+        const sections = document.querySelectorAll('section.bg-surface-light.p-8.rounded-2xl.mb-10');
+        console.log('Seções encontradas:', sections.length);
+        sections.forEach(section => {
+            const h2 = section.querySelector('h2');
+            if (h2 && h2.textContent.includes('🌐 Configuração do Site')) {
+                console.log('Mostrando seção de configuração do site');
+                section.style.display = 'block';
+            }
+        });
+        
+        // Mostra grid de sitemaps (primeiro grid)
+        const sitemapGrids = document.querySelectorAll('div.grid.grid-cols-1.lg\\:grid-cols-2.gap-8.mb-10');
+        if (sitemapGrids.length > 0) {
+            sitemapGrids[0].style.display = 'grid';
+        }
+        
+        // Mostra botões de comparação de sitemap
+        const buttonSections = document.querySelectorAll('section.text-center.my-10');
+        buttonSections.forEach(section => {
+            const button = section.querySelector('button');
+            if (button && button.textContent.includes('Comparar Sitemaps')) {
+                section.style.display = 'block';
+            }
+        });
         
         // Oculta interface do HTML
         htmlComparatorInterface.classList.add('hidden');
@@ -1062,13 +1177,33 @@ function switchComparatorMode() {
         htmlMethods.classList.add('hidden');
         
         // Atualiza título dos resultados
-        document.querySelector('.results-header h3').textContent = 'Análise Completa dos Sitemaps';
+        const resultTitle = document.querySelector('#resultSection h3');
+        if (resultTitle) resultTitle.textContent = 'Análise Completa dos Sitemaps';
         
     } else if (selectedMode === 'html') {
-        // Oculta interface do sitemap
-        document.querySelector('.site-config-section').style.display = 'none';
-        document.querySelector('.sitemap-grid').style.display = 'none';
-        document.querySelector('.compare-section').style.display = 'none';
+        // Oculta interface do sitemap - seção de configuração
+        const sections = document.querySelectorAll('section.bg-surface-light.p-8.rounded-2xl.mb-10');
+        sections.forEach(section => {
+            const h2 = section.querySelector('h2');
+            if (h2 && h2.textContent.includes('🌐 Configuração do Site')) {
+                section.style.display = 'none';
+            }
+        });
+        
+        // Oculta grid de sitemaps (primeiro grid)
+        const sitemapGrids = document.querySelectorAll('div.grid.grid-cols-1.lg\\:grid-cols-2.gap-8.mb-10');
+        if (sitemapGrids.length > 0) {
+            sitemapGrids[0].style.display = 'none';
+        }
+        
+        // Oculta botões de comparação de sitemap
+        const buttonSections = document.querySelectorAll('section.text-center.my-10');
+        buttonSections.forEach(section => {
+            const button = section.querySelector('button');
+            if (button && button.textContent.includes('Comparar Sitemaps')) {
+                section.style.display = 'none';
+            }
+        });
         
         // Mostra interface do HTML
         htmlComparatorInterface.classList.remove('hidden');
@@ -1078,7 +1213,8 @@ function switchComparatorMode() {
         htmlMethods.classList.remove('hidden');
         
         // Atualiza título dos resultados
-        document.querySelector('.results-header h3').textContent = 'Análise Completa das Diferenças HTML';
+        const resultTitle = document.querySelector('#resultSection h3');
+        if (resultTitle) resultTitle.textContent = 'Análise Completa das Diferenças HTML';
     }
     
     // Limpa resultados
@@ -1148,6 +1284,66 @@ function normalizeTagCase(html) {
     });
 }
 
+// ========================================
+// SISTEMA DE NOTIFICAÇÕES
+// ========================================
+
+// Mostra notificação no canto inferior direito
+function showNotification(title, message, type = 'info', duration = 5000) {
+    // Define ícone e cores baseado no tipo
+    const icons = {
+        'error': '❌',
+        'success': '✅',
+        'warning': '⚠️',
+        'info': 'ℹ️'
+    };
+    
+    const colors = {
+        'error': 'border-error',
+        'success': 'border-success',
+        'warning': 'border-warning',
+        'info': 'border-info'
+    };
+    
+    // Atualiza conteúdo da notificação
+    notificationIcon.textContent = icons[type] || icons.info;
+    notificationTitle.textContent = title;
+    notificationMessage.textContent = message;
+    
+    // Aplica cor da borda baseada no tipo
+    const popupContent = notificationPopup.querySelector('.bg-surface-light');
+    popupContent.className = popupContent.className.replace(/border-\w+/, '');
+    popupContent.classList.add('border', colors[type] || colors.info);
+    
+    // Mostra a notificação
+    notificationPopup.classList.remove('translate-x-full', 'opacity-0');
+    notificationPopup.classList.add('translate-x-0', 'opacity-100');
+    
+    // Auto-hide após duração especificada
+    setTimeout(() => {
+        hideNotification();
+    }, duration);
+}
+
+// Esconde a notificação
+function hideNotification() {
+    notificationPopup.classList.remove('translate-x-0', 'opacity-100');
+    notificationPopup.classList.add('translate-x-full', 'opacity-0');
+}
+
+// Funções de conveniência para diferentes tipos de notificação
+function showSuccess(title, message, duration = 3000) {
+    showNotification(title, message, 'success', duration);
+}
+
+function showWarning(title, message, duration = 4000) {
+    showNotification(title, message, 'warning', duration);
+}
+
+function showInfo(title, message, duration = 4000) {
+    showNotification(title, message, 'info', duration);
+}
+
 // Normaliza espaços em branco e formatação
 function normalizeWhitespaceAndFormatting(html) {
     // Remove quebras de linha e espaços extras
@@ -1201,6 +1397,66 @@ function normalizeAttributeOrder(html) {
         
         return `<${tagName}${sortedAttrs ? ' ' + sortedAttrs : ''}>`;
     });
+}
+
+// ========================================
+// SISTEMA DE NOTIFICAÇÕES
+// ========================================
+
+// Mostra notificação no canto inferior direito
+function showNotification(title, message, type = 'info', duration = 5000) {
+    // Define ícone e cores baseado no tipo
+    const icons = {
+        'error': '❌',
+        'success': '✅',
+        'warning': '⚠️',
+        'info': 'ℹ️'
+    };
+    
+    const colors = {
+        'error': 'border-error',
+        'success': 'border-success',
+        'warning': 'border-warning',
+        'info': 'border-info'
+    };
+    
+    // Atualiza conteúdo da notificação
+    notificationIcon.textContent = icons[type] || icons.info;
+    notificationTitle.textContent = title;
+    notificationMessage.textContent = message;
+    
+    // Aplica cor da borda baseada no tipo
+    const popupContent = notificationPopup.querySelector('.bg-surface-light');
+    popupContent.className = popupContent.className.replace(/border-\w+/, '');
+    popupContent.classList.add('border', colors[type] || colors.info);
+    
+    // Mostra a notificação
+    notificationPopup.classList.remove('translate-x-full', 'opacity-0');
+    notificationPopup.classList.add('translate-x-0', 'opacity-100');
+    
+    // Auto-hide após duração especificada
+    setTimeout(() => {
+        hideNotification();
+    }, duration);
+}
+
+// Esconde a notificação
+function hideNotification() {
+    notificationPopup.classList.remove('translate-x-0', 'opacity-100');
+    notificationPopup.classList.add('translate-x-full', 'opacity-0');
+}
+
+// Funções de conveniência para diferentes tipos de notificação
+function showSuccess(title, message, duration = 3000) {
+    showNotification(title, message, 'success', duration);
+}
+
+function showWarning(title, message, duration = 4000) {
+    showNotification(title, message, 'warning', duration);
+}
+
+function showInfo(title, message, duration = 4000) {
+    showNotification(title, message, 'info', duration);
 }
 
 // Atualiza prévia em tempo real
@@ -1328,7 +1584,7 @@ async function compareHTML() {
         showNormalizationStatus(normalizedHtmlA, normalizedHtmlB, htmlA, htmlB);
         
         resultSection.classList.remove('hidden');
-        resultSection.classList.add('fade-in');
+        resultSection.classList.add('animate-fade-in');
 
     } catch (error) {
         showError(`Erro durante a comparação: ${error.message}`);
@@ -1705,5 +1961,124 @@ function loadDOMComparator() {
         console.warn('Erro ao carregar DOM Comparator original - usando métodos alternativos');
     };
     document.head.appendChild(script);
+}
+
+// ========================================
+// FUNÇÕES DE CONTROLE DE TEMA
+// ========================================
+
+// Inicializa o tema baseado na preferência do usuário
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else {
+        // Por padrão, sempre inicia com tema claro
+        setTheme('light');
+    }
+}
+
+// Alterna entre tema claro e escuro
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+}
+
+// Define o tema
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    // Atualiza o ícone do botão
+    if (theme === 'dark') {
+        themeIcon.textContent = '☀️';
+        themeToggle.title = 'Alternar para tema claro';
+    } else {
+        themeIcon.textContent = '🌙';
+        themeToggle.title = 'Alternar para tema escuro';
+    }
+    
+    // Aplica as classes do Tailwind para o tema
+    applyThemeClasses(theme);
+}
+
+// Aplica as classes do Tailwind baseadas no tema
+function applyThemeClasses(theme) {
+    const root = document.documentElement;
+    
+    if (theme === 'dark') {
+        // Aplica tema escuro usando classes do Tailwind
+        root.classList.add('dark');
+    } else {
+        // Aplica tema claro
+        root.classList.remove('dark');
+    }
+    
+    // As cores são aplicadas via CSS com [data-theme="dark"]
+    // Não precisamos mais manipular classes manualmente
+}
+
+
+// ========================================
+// SISTEMA DE NOTIFICAÇÕES
+// ========================================
+
+// Mostra notificação no canto inferior direito
+function showNotification(title, message, type = 'info', duration = 5000) {
+    // Define ícone e cores baseado no tipo
+    const icons = {
+        'error': '❌',
+        'success': '✅',
+        'warning': '⚠️',
+        'info': 'ℹ️'
+    };
+    
+    const colors = {
+        'error': 'border-error',
+        'success': 'border-success',
+        'warning': 'border-warning',
+        'info': 'border-info'
+    };
+    
+    // Atualiza conteúdo da notificação
+    notificationIcon.textContent = icons[type] || icons.info;
+    notificationTitle.textContent = title;
+    notificationMessage.textContent = message;
+    
+    // Aplica cor da borda baseada no tipo
+    const popupContent = notificationPopup.querySelector('.bg-surface-light');
+    popupContent.className = popupContent.className.replace(/border-\w+/, '');
+    popupContent.classList.add('border', colors[type] || colors.info);
+    
+    // Mostra a notificação
+    notificationPopup.classList.remove('translate-x-full', 'opacity-0');
+    notificationPopup.classList.add('translate-x-0', 'opacity-100');
+    
+    // Auto-hide após duração especificada
+    setTimeout(() => {
+        hideNotification();
+    }, duration);
+}
+
+// Esconde a notificação
+function hideNotification() {
+    notificationPopup.classList.remove('translate-x-0', 'opacity-100');
+    notificationPopup.classList.add('translate-x-full', 'opacity-0');
+}
+
+// Funções de conveniência para diferentes tipos de notificação
+function showSuccess(title, message, duration = 3000) {
+    showNotification(title, message, 'success', duration);
+}
+
+function showWarning(title, message, duration = 4000) {
+    showNotification(title, message, 'warning', duration);
+}
+
+function showInfo(title, message, duration = 4000) {
+    showNotification(title, message, 'info', duration);
 }
 
