@@ -977,6 +977,82 @@ body {
     margin: 0 var(--space-10);
 }
 
+/* Seletor de Modo */
+.mode-selector {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-8);
+    margin-top: var(--space-20);
+}
+
+.mode-toggle {
+    cursor: pointer;
+    position: relative;
+}
+
+.mode-toggle input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.mode-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-12) var(--space-20);
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-full);
+    color: var(--color-btn-primary-text);
+    font-weight: var(--font-weight-medium);
+    transition: all var(--duration-normal) var(--ease-standard);
+    backdrop-filter: blur(10px);
+}
+
+.mode-toggle input[type="radio"]:checked + .mode-option {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.05);
+}
+
+.mode-toggle:hover .mode-option {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.mode-icon {
+    font-size: var(--font-size-lg);
+}
+
+.mode-label {
+    font-size: var(--font-size-base);
+}
+
+/* Interface do Comparador HTML */
+.html-comparator-interface {
+    transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.html-comparator-interface.hidden {
+    display: none;
+}
+
+/* Grid para áreas de HTML */
+.html-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-24);
+    margin-bottom: var(--space-32);
+}
+
+.html-column h3 {
+    color: var(--color-primary);
+    margin-bottom: var(--space-10);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+}
+
 /* Grid para áreas de Sitemap */
 .sitemap-grid {
     display: grid;
@@ -1222,16 +1298,17 @@ textarea:focus {
 }
 
 .method-card h4 {
-    color: var(--color-primary);
+    color: var(--color-text);
     margin-bottom: var(--space-10);
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
 }
 
 .method-card p {
-    color: var(--color-text-secondary);
+    color: var(--color-text);
     margin-bottom: var(--space-16);
     font-size: var(--font-size-base);
+    opacity: 0.8;
 }
 
 /* Área de resultado dos métodos */
@@ -1360,7 +1437,19 @@ textarea:focus {
         font-size: var(--font-size-lg);
     }
     
-    .html-grid {
+    .mode-selector {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-12);
+    }
+    
+    .mode-option {
+        padding: var(--space-10) var(--space-16);
+        font-size: var(--font-size-sm);
+    }
+    
+    .html-grid,
+    .sitemap-grid {
         grid-template-columns: 1fr;
     }
     

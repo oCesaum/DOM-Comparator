@@ -26,6 +26,13 @@ let resultSection, errorSection, operationCount, sitemapStatus, analysisStatus;
 let urlResult, priorityResult, frequencyResult, dateResult, statsResult;
 let errorMessage, sitemapInfo, analysisInfo, previewA, previewB;
 
+// Elementos DOM do Comparador HTML
+let htmlComparatorInterface, htmlATextarea, htmlBTextarea, compareHtmlBtn, previewBtn;
+let normalizedA, normalizedB, normalizationStatus, normalizationInfo;
+let normalizeWhitespace, normalizeAttributes, ignoreComments, normalizeCase;
+let textResult, domResult, attributeResult, hashResult, normalizedResult;
+let sitemapMethods, htmlMethods;
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     initializeElements();
@@ -66,6 +73,34 @@ function initializeElements() {
     analysisInfo = document.getElementById('analysisInfo');
     previewA = document.getElementById('previewA');
     previewB = document.getElementById('previewB');
+    
+    // Elementos do Comparador HTML
+    htmlComparatorInterface = document.getElementById('htmlComparatorInterface');
+    htmlATextarea = document.getElementById('htmlA');
+    htmlBTextarea = document.getElementById('htmlB');
+    compareHtmlBtn = document.getElementById('compareHtmlBtn');
+    previewBtn = document.getElementById('previewBtn');
+    normalizedA = document.getElementById('normalizedA');
+    normalizedB = document.getElementById('normalizedB');
+    normalizationStatus = document.getElementById('normalizationStatus');
+    normalizationInfo = document.getElementById('normalizationInfo');
+    
+    // Checkboxes de normalização
+    normalizeWhitespace = document.getElementById('normalizeWhitespace');
+    normalizeAttributes = document.getElementById('normalizeAttributes');
+    ignoreComments = document.getElementById('ignoreComments');
+    normalizeCase = document.getElementById('normalizeCase');
+    
+    // Elementos de resultado do HTML
+    textResult = document.getElementById('textResult');
+    domResult = document.getElementById('domResult');
+    attributeResult = document.getElementById('attributeResult');
+    hashResult = document.getElementById('hashResult');
+    normalizedResult = document.getElementById('normalizedResult');
+    
+    // Containers de métodos
+    sitemapMethods = document.getElementById('sitemapMethods');
+    htmlMethods = document.getElementById('htmlMethods');
 }
 
 function setupEventListeners() {
@@ -76,13 +111,34 @@ function setupEventListeners() {
     compareBtn.addEventListener('click', compareSitemaps);
     analyzeBtn.addEventListener('click', analyzeSitemap);
     
+    // Eventos do Comparador HTML
+    compareHtmlBtn.addEventListener('click', compareHTML);
+    previewBtn.addEventListener('click', previewNormalization);
+    
     // Eventos de mudança nos textareas
     sitemapATextarea.addEventListener('input', updateSitemapPreview);
     sitemapBTextarea.addEventListener('input', updateSitemapPreview);
+    htmlATextarea.addEventListener('input', hideResults);
+    htmlBTextarea.addEventListener('input', hideResults);
     
     // Eventos nos campos de URL
     siteUrlInput.addEventListener('input', hideResults);
     sitemapUrlInput.addEventListener('input', hideResults);
+    
+    // Eventos nos checkboxes para atualizar prévia em tempo real
+    normalizeWhitespace.addEventListener('change', updatePreview);
+    normalizeAttributes.addEventListener('change', updatePreview);
+    ignoreComments.addEventListener('change', updatePreview);
+    normalizeCase.addEventListener('change', updatePreview);
+    
+    // Eventos do seletor de modo
+    const modeRadios = document.querySelectorAll('input[name="comparatorMode"]');
+    modeRadios.forEach(radio => {
+        radio.addEventListener('change', switchComparatorMode);
+    });
+    
+    // Carrega DOM Comparator
+    loadDOMComparator();
 }
 
 // FUNÇÕES PRINCIPAIS DO ROBÔ DE SITEMAP
@@ -180,6 +236,12 @@ async function compareSitemaps() {
             return;
         }
         
+        // Validação adicional dos dados parseados
+        if (!parsedA.data || !Array.isArray(parsedA.data) || !parsedB.data || !Array.isArray(parsedB.data)) {
+            showError('Erro: Dados do sitemap inválidos após o parse.');
+            return;
+        }
+        
         // Executa comparações
         const urlDiffs = compareUrls(parsedA.data, parsedB.data);
         const priorityDiffs = comparePriorities(parsedA.data, parsedB.data);
@@ -229,7 +291,8 @@ async function analyzeSitemap() {
             return;
         }
         
-        const analysis = analyzeSitemapData(parsed.data);
+        const analysisData = analyzeSitemapData(parsed.data);
+        const analysis = formatSitemapAnalysis(analysisData);
         showAnalysisStatus(analysis);
         
     } catch (error) {
@@ -554,6 +617,18 @@ function generateStats(sitemapA, sitemapB) {
 
 // Analisa dados de um sitemap
 function analyzeSitemapData(sitemapData) {
+    if (!sitemapData || !Array.isArray(sitemapData)) {
+        return {
+            totalUrls: 0,
+            avgPriority: 0,
+            frequencyDistribution: {},
+            avgLastmod: null,
+            hasPriorities: false,
+            hasFrequencies: false,
+            hasDates: false
+        };
+    }
+    
     const totalUrls = sitemapData.length;
     const priorities = sitemapData.filter(item => item.priority !== null).map(item => item.priority);
     const frequencies = sitemapData.filter(item => item.changefreq !== null).map(item => item.changefreq);
@@ -563,7 +638,9 @@ function analyzeSitemapData(sitemapData) {
         priorities.reduce((sum, p) => sum + p, 0) / priorities.length : 0;
     
     const frequencyDistribution = frequencies.reduce((acc, freq) => {
-        acc[freq] = (acc[freq] || 0) + 1;
+        if (freq && typeof freq === 'string') {
+            acc[freq] = (acc[freq] || 0) + 1;
+        }
         return acc;
     }, {});
     
@@ -579,6 +656,24 @@ function analyzeSitemapData(sitemapData) {
         hasFrequencies: frequencies.length > 0,
         hasDates: dates.length > 0
     };
+}
+
+// Formata análise individual de sitemap para exibição
+function formatSitemapAnalysis(analysisData) {
+    let analysis = `<strong>Análise do Sitemap:</strong><br><br>`;
+    analysis += `• <strong>Total de URLs:</strong> ${analysisData.totalUrls}<br>`;
+    analysis += `• <strong>Prioridade média:</strong> ${analysisData.avgPriority}<br>`;
+    analysis += `• <strong>Tipos de frequência:</strong> ${Object.keys(analysisData.frequencyDistribution || {}).length}<br>`;
+    analysis += `• <strong>Última modificação média:</strong> ${analysisData.avgLastmod || 'N/A'}<br><br>`;
+    
+    if (Object.keys(analysisData.frequencyDistribution || {}).length > 0) {
+        analysis += `<strong>Distribuição de frequências:</strong><br>`;
+        for (const [freq, count] of Object.entries(analysisData.frequencyDistribution)) {
+            analysis += `• ${freq}: ${count} URLs<br>`;
+        }
+    }
+    
+    return analysis;
 }
 
 // FUNÇÕES DE FORMATAÇÃO DE RESULTADOS
@@ -637,7 +732,7 @@ function formatPriorityComparison(diffs) {
     let html = `<strong>${diffs.length} diferença(s) de prioridade:</strong><br><br>`;
     
     diffs.slice(0, 5).forEach(diff => {
-        html += `<div style="margin-bottom: 8px; padding: 8px; background: #fff3cd; border-radius: 4px;">`;
+        html += `<div style="margin-bottom: 8px; padding: 8px; background: #4a3d2d; border-radius: 4px; color: #fff3cd;">`;
         html += `<strong>URL:</strong> ${escapeHtml(diff.url)}<br>`;
         html += `<strong>Prioridade:</strong> ${diff.original || 'N/A'} → ${diff.modified || 'N/A'}`;
         html += `</div>`;
@@ -658,7 +753,7 @@ function formatFrequencyComparison(diffs) {
     let html = `<strong>${diffs.length} diferença(s) de frequência:</strong><br><br>`;
     
     diffs.slice(0, 5).forEach(diff => {
-        html += `<div style="margin-bottom: 8px; padding: 8px; background: #d1ecf1; border-radius: 4px;">`;
+        html += `<div style="margin-bottom: 8px; padding: 8px; background: #2d3a4a; border-radius: 4px; color: #d1ecf1;">`;
         html += `<strong>URL:</strong> ${escapeHtml(diff.url)}<br>`;
         html += `<strong>Frequência:</strong> ${diff.original || 'N/A'} → ${diff.modified || 'N/A'}`;
         html += `</div>`;
@@ -679,7 +774,7 @@ function formatDateComparison(diffs) {
     let html = `<strong>${diffs.length} diferença(s) de data:</strong><br><br>`;
     
     diffs.slice(0, 5).forEach(diff => {
-        html += `<div style="margin-bottom: 8px; padding: 8px; background: #f8d7da; border-radius: 4px;">`;
+        html += `<div style="margin-bottom: 8px; padding: 8px; background: #4a2d2d; border-radius: 4px; color: #f8d7da;">`;
         html += `<strong>URL:</strong> ${escapeHtml(diff.url)}<br>`;
         html += `<strong>Data:</strong> ${diff.original || 'N/A'} → ${diff.modified || 'N/A'}`;
         html += `</div>`;
@@ -698,27 +793,27 @@ function formatStatsComparison(stats) {
     html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">`;
     
     // Sitemap A
-    html += `<div style="background: #e8f5e8; padding: 12px; border-radius: 6px;">`;
+    html += `<div style="background: #2d4a3e; padding: 12px; border-radius: 6px; color: #e8f5e8;">`;
     html += `<strong>Sitemap A:</strong><br>`;
     html += `• Total de URLs: ${stats.sitemapA.totalUrls}<br>`;
     html += `• Prioridade média: ${stats.sitemapA.avgPriority}<br>`;
-    html += `• Frequências: ${Object.keys(stats.sitemapA.frequencyDistribution).length} tipos<br>`;
+    html += `• Frequências: ${Object.keys(stats.sitemapA.frequencyDistribution || {}).length} tipos<br>`;
     html += `• Última modificação: ${stats.sitemapA.avgLastmod || 'N/A'}`;
     html += `</div>`;
     
     // Sitemap B
-    html += `<div style="background: #e8f0ff; padding: 12px; border-radius: 6px;">`;
+    html += `<div style="background: #2d3a4a; padding: 12px; border-radius: 6px; color: #e8f0ff;">`;
     html += `<strong>Sitemap B:</strong><br>`;
     html += `• Total de URLs: ${stats.sitemapB.totalUrls}<br>`;
     html += `• Prioridade média: ${stats.sitemapB.avgPriority}<br>`;
-    html += `• Frequências: ${Object.keys(stats.sitemapB.frequencyDistribution).length} tipos<br>`;
+    html += `• Frequências: ${Object.keys(stats.sitemapB.frequencyDistribution || {}).length} tipos<br>`;
     html += `• Última modificação: ${stats.sitemapB.avgLastmod || 'N/A'}`;
     html += `</div>`;
     
     html += `</div>`;
     
     // Comparação
-    html += `<div style="margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 6px;">`;
+    html += `<div style="margin-top: 16px; padding: 12px; background: #4a3d2d; border-radius: 6px; color: #fff3cd;">`;
     html += `<strong>Diferenças:</strong><br>`;
     html += `• URLs: ${stats.comparison.urlDifference > 0 ? '+' : ''}${stats.comparison.urlDifference}<br>`;
     html += `• Prioridade média: ${stats.comparison.priorityDifference > 0 ? '+' : ''}${stats.comparison.priorityDifference.toFixed(2)}<br>`;
@@ -803,28 +898,30 @@ function showManualSitemapDialog() {
     
     dialog.innerHTML = `
         <div style="
-            background: white;
+            background: var(--color-surface);
             padding: 24px;
             border-radius: 8px;
             max-width: 600px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
+            border: 2px solid var(--color-primary);
+            box-shadow: var(--shadow-lg);
         ">
-            <h3 style="margin-top: 0; color: #333;">📋 Inserir Sitemap Manualmente</h3>
-            <p style="color: #666; margin-bottom: 16px;">
+            <h3 style="margin-top: 0; color: var(--color-primary); font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold);">📋 Inserir Sitemap Manualmente</h3>
+            <p style="color: var(--color-text); margin-bottom: 16px; line-height: var(--line-height-normal);">
                 Quando há bloqueio de CORS, você pode copiar o sitemap manualmente:
             </p>
-            <ol style="color: #666; margin-bottom: 16px;">
-                <li>Acesse o sitemap no navegador: <a href="${targetUrl}" target="_blank" style="color: #007bff;">${targetUrl}</a></li>
+            <ol style="color: var(--color-text); margin-bottom: 16px; line-height: var(--line-height-normal);">
+                <li>Acesse o sitemap no navegador: <a href="${targetUrl}" target="_blank" style="color: var(--color-primary); text-decoration: none;">${targetUrl}</a></li>
                 <li>Copie todo o conteúdo XML (Ctrl+A, Ctrl+C)</li>
                 <li>Cole no campo abaixo</li>
             </ol>
             <textarea id="manualSitemapInput" placeholder="Cole aqui o conteúdo do sitemap XML..." 
-                style="width: 100%; height: 200px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;"></textarea>
+                style="width: 100%; height: 200px; padding: 12px; border: 1px solid var(--color-border); border-radius: 4px; font-family: var(--font-family-mono); font-size: 12px; background: var(--color-background); color: var(--color-text); resize: vertical;"></textarea>
             <div style="margin-top: 16px; text-align: right;">
-                <button id="cancelManualBtn" style="margin-right: 8px; padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Cancelar</button>
-                <button id="confirmManualBtn" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Inserir Sitemap</button>
+                <button id="cancelManualBtn" style="margin-right: 8px; padding: 8px 16px; border: 1px solid var(--color-border); background: var(--color-secondary); color: var(--color-text); border-radius: 4px; cursor: pointer; transition: var(--duration-fast) var(--ease-standard);">Cancelar</button>
+                <button id="confirmManualBtn" style="padding: 8px 16px; background: var(--color-primary); color: var(--color-btn-primary-text); border: none; border-radius: 4px; cursor: pointer; transition: var(--duration-fast) var(--ease-standard);">Inserir Sitemap</button>
             </div>
         </div>
     `;
@@ -832,11 +929,14 @@ function showManualSitemapDialog() {
     document.body.appendChild(dialog);
     
     // Event listeners
-    document.getElementById('cancelManualBtn').addEventListener('click', () => {
+    const cancelBtn = document.getElementById('cancelManualBtn');
+    const confirmBtn = document.getElementById('confirmManualBtn');
+    
+    cancelBtn.addEventListener('click', () => {
         document.body.removeChild(dialog);
     });
     
-    document.getElementById('confirmManualBtn').addEventListener('click', () => {
+    confirmBtn.addEventListener('click', () => {
         const content = document.getElementById('manualSitemapInput').value.trim();
         if (content) {
             sitemapATextarea.value = content;
@@ -846,6 +946,23 @@ function showManualSitemapDialog() {
         } else {
             alert('Por favor, cole o conteúdo do sitemap.');
         }
+    });
+    
+    // Adicionar efeitos de hover
+    cancelBtn.addEventListener('mouseenter', () => {
+        cancelBtn.style.background = 'var(--color-secondary-hover)';
+    });
+    
+    cancelBtn.addEventListener('mouseleave', () => {
+        cancelBtn.style.background = 'var(--color-secondary)';
+    });
+    
+    confirmBtn.addEventListener('mouseenter', () => {
+        confirmBtn.style.background = 'var(--color-primary-hover)';
+    });
+    
+    confirmBtn.addEventListener('mouseleave', () => {
+        confirmBtn.style.background = 'var(--color-primary)';
     });
     
     // Fecha ao clicar fora
@@ -872,39 +989,6 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Função para análise individual de sitemap
-function analyzeSitemapData(sitemapData) {
-    const totalUrls = sitemapData.length;
-    const priorities = sitemapData.filter(item => item.priority !== null).map(item => item.priority);
-    const frequencies = sitemapData.filter(item => item.changefreq !== null).map(item => item.changefreq);
-    const dates = sitemapData.filter(item => item.lastmod !== null).map(item => item.lastmod);
-    
-    const avgPriority = priorities.length > 0 ? 
-        priorities.reduce((sum, p) => sum + p, 0) / priorities.length : 0;
-    
-    const frequencyDistribution = frequencies.reduce((acc, freq) => {
-        acc[freq] = (acc[freq] || 0) + 1;
-        return acc;
-    }, {});
-    
-    const avgLastmod = dates.length > 0 ? 
-        dates.reduce((sum, date) => sum + new Date(date).getTime(), 0) / dates.length : null;
-    
-    let analysis = `<strong>Análise do Sitemap:</strong><br><br>`;
-    analysis += `• <strong>Total de URLs:</strong> ${totalUrls}<br>`;
-    analysis += `• <strong>Prioridade média:</strong> ${Math.round(avgPriority * 100) / 100}<br>`;
-    analysis += `• <strong>Tipos de frequência:</strong> ${Object.keys(frequencyDistribution).length}<br>`;
-    analysis += `• <strong>Última modificação média:</strong> ${avgLastmod ? new Date(avgLastmod).toISOString().split('T')[0] : 'N/A'}<br><br>`;
-    
-    if (Object.keys(frequencyDistribution).length > 0) {
-        analysis += `<strong>Distribuição de frequências:</strong><br>`;
-        for (const [freq, count] of Object.entries(frequencyDistribution)) {
-            analysis += `• ${freq}: ${count} URLs<br>`;
-        }
-    }
-    
-    return analysis;
-}
 
 // Adiciona estilos responsivos para mobile
 function addResponsiveStyles() {
@@ -930,36 +1014,696 @@ function addResponsiveStyles() {
 // Inicializa estilos responsivos
 addResponsiveStyles();
 
-// Função para análise individual de sitemap
-function analyzeSitemapData(sitemapData) {
-    const totalUrls = sitemapData.length;
-    const priorities = sitemapData.filter(item => item.priority !== null).map(item => item.priority);
-    const frequencies = sitemapData.filter(item => item.changefreq !== null).map(item => item.changefreq);
-    const dates = sitemapData.filter(item => item.lastmod !== null).map(item => item.lastmod);
+// ========================================
+// FUNÇÕES DO COMPARADOR HTML
+// ========================================
+
+// Exemplos pré-definidos para o comparador HTML
+const htmlExamples = {
+    estilo: {
+        htmlA: `<div><p>Texto normal</p></div>`,
+        htmlB: `<div><p style="color: red; font-weight: bold;">Texto normal</p></div>`
+    },
+    texto: {
+        htmlA: `<button>Clique aqui</button>`,
+        htmlB: `<button>Comprar agora</button>`
+    },
+    atributo: {
+        htmlA: `<ul><li class="active">Item 1</li><li>Item 2</li></ul>`,
+        htmlB: `<ul><li>Item 1</li><li>Item 2</li></ul>`
+    },
+    estrutura: {
+        htmlA: `<div><p>Parágrafo 1</p></div>`,
+        htmlB: `<div><p>Parágrafo 1</p><span>Novo elemento</span></div>`
+    },
+    formatacao: {
+        htmlA: `<div>
+    <p>Texto normal</p>
+</div>`,
+        htmlB: `<div><p>Texto normal</p></div>`
+    }
+};
+
+// Alterna entre modos de comparação
+function switchComparatorMode() {
+    const selectedMode = document.querySelector('input[name="comparatorMode"]:checked').value;
     
-    const avgPriority = priorities.length > 0 ? 
-        priorities.reduce((sum, p) => sum + p, 0) / priorities.length : 0;
+    if (selectedMode === 'sitemap') {
+        // Mostra interface do sitemap
+        document.querySelector('.site-config-section').style.display = 'block';
+        document.querySelector('.sitemap-grid').style.display = 'grid';
+        document.querySelector('.compare-section').style.display = 'block';
+        
+        // Oculta interface do HTML
+        htmlComparatorInterface.classList.add('hidden');
+        
+        // Mostra métodos do sitemap
+        sitemapMethods.classList.remove('hidden');
+        htmlMethods.classList.add('hidden');
+        
+        // Atualiza título dos resultados
+        document.querySelector('.results-header h3').textContent = 'Análise Completa dos Sitemaps';
+        
+    } else if (selectedMode === 'html') {
+        // Oculta interface do sitemap
+        document.querySelector('.site-config-section').style.display = 'none';
+        document.querySelector('.sitemap-grid').style.display = 'none';
+        document.querySelector('.compare-section').style.display = 'none';
+        
+        // Mostra interface do HTML
+        htmlComparatorInterface.classList.remove('hidden');
+        
+        // Mostra métodos do HTML
+        sitemapMethods.classList.add('hidden');
+        htmlMethods.classList.remove('hidden');
+        
+        // Atualiza título dos resultados
+        document.querySelector('.results-header h3').textContent = 'Análise Completa das Diferenças HTML';
+    }
     
-    const frequencyDistribution = frequencies.reduce((acc, freq) => {
-        acc[freq] = (acc[freq] || 0) + 1;
-        return acc;
-    }, {});
+    // Limpa resultados
+    hideResults();
+}
+
+// Carrega exemplo no comparador HTML
+function loadExample(type) {
+    const example = htmlExamples[type];
+    if (example) {
+        htmlATextarea.value = example.htmlA;
+        htmlBTextarea.value = example.htmlB;
+        hideResults();
+        updatePreview();
+    }
+}
+
+// Limpa campos do comparador HTML
+function clearFields() {
+    htmlATextarea.value = '';
+    htmlBTextarea.value = '';
+    hideResults();
+    updatePreview();
+}
+
+// FUNÇÃO PRINCIPAL DE NORMALIZAÇÃO DE HTML
+function normalizeHTML(html) {
+    if (!html || !html.trim()) return '';
     
-    const avgLastmod = dates.length > 0 ? 
-        dates.reduce((sum, date) => sum + new Date(date).getTime(), 0) / dates.length : null;
+    let normalized = html.trim();
     
-    let analysis = `<strong>Análise do Sitemap:</strong><br><br>`;
-    analysis += `• <strong>Total de URLs:</strong> ${totalUrls}<br>`;
-    analysis += `• <strong>Prioridade média:</strong> ${Math.round(avgPriority * 100) / 100}<br>`;
-    analysis += `• <strong>Tipos de frequência:</strong> ${Object.keys(frequencyDistribution).length}<br>`;
-    analysis += `• <strong>Última modificação média:</strong> ${avgLastmod ? new Date(avgLastmod).toISOString().split('T')[0] : 'N/A'}<br><br>`;
+    try {
+        // Aplica as normalizações baseadas nas opções selecionadas
+        if (ignoreComments.checked) {
+            normalized = removeComments(normalized);
+        }
+        
+        if (normalizeCase.checked) {
+            normalized = normalizeTagCase(normalized);
+        }
+        
+        if (normalizeWhitespace.checked) {
+            normalized = normalizeWhitespaceAndFormatting(normalized);
+        }
+        
+        if (normalizeAttributes.checked) {
+            normalized = normalizeAttributeOrder(normalized);
+        }
+        
+        return normalized;
+        
+    } catch (error) {
+        console.warn('Erro na normalização:', error);
+        return html.trim();
+    }
+}
+
+// Remove comentários HTML
+function removeComments(html) {
+    return html.replace(/<!--[\s\S]*?-->/g, '');
+}
+
+// Normaliza maiúsculas/minúsculas das tags
+function normalizeTagCase(html) {
+    return html.replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^<>]*>/gi, function(match, tagName) {
+        return match.replace(new RegExp(tagName, 'gi'), tagName.toLowerCase());
+    });
+}
+
+// Normaliza espaços em branco e formatação
+function normalizeWhitespaceAndFormatting(html) {
+    // Remove quebras de linha e espaços extras
+    let normalized = html.replace(/\s+/g, ' ').trim();
     
-    if (Object.keys(frequencyDistribution).length > 0) {
-        analysis += `<strong>Distribuição de frequências:</strong><br>`;
-        for (const [freq, count] of Object.entries(frequencyDistribution)) {
-            analysis += `• ${freq}: ${count} URLs<br>`;
+    // Remove espaços antes e depois de tags
+    normalized = normalized.replace(/\s*<\s*/g, '<');
+    normalized = normalized.replace(/\s*>\s*/g, '>');
+    
+    // Remove espaços entre tags adjacentes
+    normalized = normalized.replace(/>\s+</g, '><');
+    
+    // Normaliza espaços dentro de tags (mas preserva conteúdo)
+    normalized = normalized.replace(/<([^>]+)>/g, function(match, content) {
+        // Normaliza espaços entre atributos
+        let normalized = content.replace(/\s+/g, ' ').trim();
+        return '<' + normalized + '>';
+    });
+    
+    return normalized;
+}
+
+// Normaliza ordem dos atributos
+function normalizeAttributeOrder(html) {
+    return html.replace(/<([a-zA-Z][a-zA-Z0-9]*)\b([^<>]*)>/gi, function(match, tagName, attributes) {
+        if (!attributes || !attributes.trim()) {
+            return match;
+        }
+        
+        // Extrai atributos
+        const attrRegex = /([a-zA-Z-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+        const attrs = [];
+        let attrMatch;
+        
+        while ((attrMatch = attrRegex.exec(attributes)) !== null) {
+            const name = attrMatch[1].toLowerCase();
+            const value = attrMatch[2] || attrMatch[3] || attrMatch[4] || '';
+            attrs.push({ name, value, original: attrMatch[0] });
+        }
+        
+        // Ordena atributos alfabeticamente
+        attrs.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Reconstrói a tag
+        const sortedAttrs = attrs.map(attr => {
+            if (attr.value) {
+                return `${attr.name}="${attr.value}"`;
+            }
+            return attr.name;
+        }).join(' ');
+        
+        return `<${tagName}${sortedAttrs ? ' ' + sortedAttrs : ''}>`;
+    });
+}
+
+// Atualiza prévia em tempo real
+function updatePreview() {
+    const htmlA = htmlATextarea.value;
+    const htmlB = htmlBTextarea.value;
+    
+    if (htmlA) {
+        normalizedA.textContent = normalizeHTML(htmlA);
+    } else {
+        normalizedA.textContent = '(vazio)';
+    }
+    
+    if (htmlB) {
+        normalizedB.textContent = normalizeHTML(htmlB);
+    } else {
+        normalizedB.textContent = '(vazio)';
+    }
+}
+
+// Prévia da normalização
+function previewNormalization() {
+    const htmlA = htmlATextarea.value.trim();
+    const htmlB = htmlBTextarea.value.trim();
+    
+    if (!htmlA && !htmlB) {
+        showError('Por favor, preencha pelo menos um dos campos HTML para ver a prévia.');
+        return;
+    }
+    
+    updatePreview();
+    
+    // Mostra informações sobre a normalização
+    let info = '<strong>Opções de normalização ativas:</strong><br><br>';
+    
+    if (normalizeWhitespace.checked) {
+        info += '• <span class="result-info">Normalização de espaços em branco:</span> Remove quebras de linha, espaços extras e indentação<br>';
+    }
+    
+    if (normalizeAttributes.checked) {
+        info += '• <span class="result-info">Ordenação de atributos:</span> Ordena atributos alfabeticamente<br>';
+    }
+    
+    if (ignoreComments.checked) {
+        info += '• <span class="result-info">Remoção de comentários:</span> Remove todos os comentários HTML<br>';
+    }
+    
+    if (normalizeCase.checked) {
+        info += '• <span class="result-info">Normalização de maiúsculas:</span> Converte tags para minúsculas<br>';
+    }
+    
+    if (!normalizeWhitespace.checked && !normalizeAttributes.checked && !ignoreComments.checked && !normalizeCase.checked) {
+        info += '<span class="result-warning">⚠️ Nenhuma opção de normalização está ativa</span>';
+    }
+    
+    normalizationInfo.innerHTML = info;
+    normalizationStatus.classList.remove('hidden');
+}
+
+// Função principal de comparação HTML
+async function compareHTML() {
+    const htmlA = htmlATextarea.value.trim();
+    const htmlB = htmlBTextarea.value.trim();
+
+    if (!htmlA || !htmlB) {
+        showError('Por favor, preencha ambos os campos HTML.');
+        return;
+    }
+
+    showLoading(compareHtmlBtn, '🔍 Analisando com Normalização...');
+    hideResults();
+
+    try {
+        let totalDifferences = 0;
+        
+        // Normaliza os HTMLs
+        const normalizedHtmlA = normalizeHTML(htmlA);
+        const normalizedHtmlB = normalizeHTML(htmlB);
+        
+        // MÉTODO 1: Comparação Normalizada (PRINCIPAL)
+        const normalizedDiffs = compareNormalizedHTML(normalizedHtmlA, normalizedHtmlB, htmlA, htmlB);
+        normalizedResult.innerHTML = formatNormalizedComparison(normalizedDiffs);
+        if (normalizedDiffs.hasDifference) totalDifferences += 1;
+
+        // MÉTODO 2: Comparação Textual Original
+        const textDiffs = compareText(htmlA, htmlB);
+        textResult.innerHTML = formatTextComparison(textDiffs);
+        if (textDiffs.length > 0) totalDifferences += textDiffs.length;
+
+        // MÉTODO 3: DOM Comparator Original (se disponível)
+        let domDiffs = [];
+        try {
+            if (typeof VWO !== 'undefined' && VWO.DOMComparator) {
+                const comparator = VWO.DOMComparator.create({
+                    stringA: normalizedHtmlA,
+                    stringB: normalizedHtmlB
+                });
+                domDiffs = comparator.compare();
+                domResult.innerHTML = formatDOMComparison(domDiffs);
+                if (domDiffs.length > 0) totalDifferences += domDiffs.length;
+            } else {
+                domResult.innerHTML = '<em>DOM Comparator não carregado. Usando método alternativo...</em>';
+                const altDiffs = compareDOM(normalizedHtmlA, normalizedHtmlB);
+                domResult.innerHTML += '<br><br>' + formatAttributeComparison(altDiffs);
+                if (altDiffs.length > 0) totalDifferences += altDiffs.length;
+            }
+        } catch (e) {
+            domResult.innerHTML = `<span class="result-error">Erro no DOM Comparator: ${e.message}</span>`;
+        }
+
+        // MÉTODO 4: Análise de Atributos
+        const attrDiffs = compareAttributes(normalizedHtmlA, normalizedHtmlB);
+        attributeResult.innerHTML = formatAttributeComparison(attrDiffs);
+        if (attrDiffs.length > 0) totalDifferences += attrDiffs.length;
+
+        // MÉTODO 5: Comparação Hash
+        const hashDiffs = compareByHash(normalizedHtmlA, normalizedHtmlB);
+        hashResult.innerHTML = formatHashComparison(hashDiffs);
+        if (hashDiffs.length > 0) totalDifferences += hashDiffs.length;
+
+        // Atualiza contador
+        operationCount.textContent = `${totalDifferences} diferença${totalDifferences !== 1 ? 's' : ''} encontrada${totalDifferences !== 1 ? 's' : ''}`;
+
+        // Mostra informações sobre normalização
+        showNormalizationStatus(normalizedHtmlA, normalizedHtmlB, htmlA, htmlB);
+        
+        resultSection.classList.remove('hidden');
+        resultSection.classList.add('fade-in');
+
+    } catch (error) {
+        showError(`Erro durante a comparação: ${error.message}`);
+    } finally {
+        hideLoading(compareHtmlBtn, 'Comparar HTML com Normalização Inteligente');
+    }
+}
+
+// NOVO MÉTODO: Comparação de HTML Normalizado
+function compareNormalizedHTML(normalizedA, normalizedB, originalA, originalB) {
+    const isIdentical = normalizedA === normalizedB;
+    
+    return {
+        hasDifference: !isIdentical,
+        normalizedA: normalizedA,
+        normalizedB: normalizedB,
+        originalA: originalA,
+        originalB: originalB,
+        similarity: isIdentical ? 100 : calculateSimilarity(normalizedA, normalizedB)
+    };
+}
+
+function showNormalizationStatus(normalizedA, normalizedB, originalA, originalB) {
+    let info = '<strong>Resultado da Normalização:</strong><br><br>';
+    
+    const originalEqual = originalA === originalB;
+    const normalizedEqual = normalizedA === normalizedB;
+    
+    if (originalEqual && normalizedEqual) {
+        info += '<span class="result-success">✅ Os HTMLs são idênticos (original e normalizado)</span>';
+    } else if (!originalEqual && normalizedEqual) {
+        info += '<span class="result-success">✅ Os HTMLs são estruturalmente idênticos após normalização</span><br>';
+        info += '<span class="result-info">💡 As diferenças detectadas são apenas de formatação (espaços, quebras de linha, etc.)</span>';
+    } else if (originalEqual && !normalizedEqual) {
+        info += '<span class="result-warning">⚠️ Situação inesperada: originais iguais mas normalizados diferentes</span>';
+    } else {
+        info += '<span class="result-error">❌ Os HTMLs possuem diferenças estruturais reais</span>';
+    }
+    
+    info += '<br><br><strong>Estatísticas:</strong><br>';
+    info += `• Tamanho original A: ${originalA.length} caracteres<br>`;
+    info += `• Tamanho original B: ${originalB.length} caracteres<br>`;
+    info += `• Tamanho normalizado A: ${normalizedA.length} caracteres<br>`;
+    info += `• Tamanho normalizado B: ${normalizedB.length} caracteres<br>`;
+    
+    const compressionA = ((originalA.length - normalizedA.length) / originalA.length * 100).toFixed(1);
+    const compressionB = ((originalB.length - normalizedB.length) / originalB.length * 100).toFixed(1);
+    
+    info += `• Compressão A: ${compressionA}%<br>`;
+    info += `• Compressão B: ${compressionB}%`;
+    
+    normalizationInfo.innerHTML = info;
+    normalizationStatus.classList.remove('hidden');
+}
+
+// MÉTODOS DE COMPARAÇÃO HTML EXISTENTES
+
+function compareText(htmlA, htmlB) {
+    const linesA = htmlA.split('\n');
+    const linesB = htmlB.split('\n');
+    const differences = [];
+
+    const maxLines = Math.max(linesA.length, linesB.length);
+    
+    for (let i = 0; i < maxLines; i++) {
+        const lineA = linesA[i] || '';
+        const lineB = linesB[i] || '';
+        
+        if (lineA !== lineB) {
+            differences.push({
+                line: i + 1,
+                original: lineA,
+                modified: lineB,
+                type: !lineA ? 'added' : !lineB ? 'removed' : 'changed'
+            });
+        }
+    }
+
+    return differences;
+}
+
+function compareDOM(htmlA, htmlB) {
+    const differences = [];
+    
+    try {
+        const tempDiv1 = document.createElement('div');
+        const tempDiv2 = document.createElement('div');
+        tempDiv1.innerHTML = htmlA;
+        tempDiv2.innerHTML = htmlB;
+
+        if (tempDiv1.innerHTML !== tempDiv2.innerHTML) {
+            differences.push({
+                type: 'structure_change',
+                description: 'Estrutura do DOM foi alterada',
+                original: htmlA,
+                modified: htmlB
+            });
+        }
+    } catch (e) {
+        differences.push({
+            type: 'parse_error',
+            description: 'Erro ao analisar HTML: ' + e.message
+        });
+    }
+
+    return differences;
+}
+
+function compareAttributes(htmlA, htmlB) {
+    const differences = [];
+    
+    try {
+        const tempDiv1 = document.createElement('div');
+        const tempDiv2 = document.createElement('div');
+        tempDiv1.innerHTML = htmlA;
+        tempDiv2.innerHTML = htmlB;
+
+        const elements1 = tempDiv1.querySelectorAll('*');
+        const elements2 = tempDiv2.querySelectorAll('*');
+
+        if (elements1.length !== elements2.length) {
+            differences.push({
+                type: 'element_count',
+                description: `Quantidade de elementos alterada: ${elements1.length} → ${elements2.length}`
+            });
+        }
+
+        const minLength = Math.min(elements1.length, elements2.length);
+        
+        for (let i = 0; i < minLength; i++) {
+            const el1 = elements1[i];
+            const el2 = elements2[i];
+
+            if (el1.tagName !== el2.tagName) {
+                differences.push({
+                    type: 'tag_change',
+                    description: `Tag alterada: ${el1.tagName} → ${el2.tagName}`,
+                    position: i + 1
+                });
+            }
+
+            const attrs1 = Array.from(el1.attributes).map(attr => `${attr.name}="${attr.value}"`);
+            const attrs2 = Array.from(el2.attributes).map(attr => `${attr.name}="${attr.value}"`);
+
+            attrs1.forEach(attr => {
+                if (!attrs2.includes(attr)) {
+                    differences.push({
+                        type: 'attribute_removed',
+                        description: `Atributo removido: ${attr}`,
+                        element: el1.tagName.toLowerCase(),
+                        position: i + 1
+                    });
+                }
+            });
+
+            attrs2.forEach(attr => {
+                if (!attrs1.includes(attr)) {
+                    differences.push({
+                        type: 'attribute_added',
+                        description: `Atributo adicionado: ${attr}`,
+                        element: el2.tagName.toLowerCase(),
+                        position: i + 1
+                    });
+                }
+            });
+
+            if (el1.textContent.trim() !== el2.textContent.trim()) {
+                differences.push({
+                    type: 'text_change',
+                    description: `Texto alterado: "${el1.textContent.trim()}" → "${el2.textContent.trim()}"`,
+                    element: el1.tagName.toLowerCase(),
+                    position: i + 1
+                });
+            }
+        }
+
+    } catch (e) {
+        differences.push({
+            type: 'analysis_error',
+            description: 'Erro na análise de atributos: ' + e.message
+        });
+    }
+
+    return differences;
+}
+
+function compareByHash(htmlA, htmlB) {
+    const differences = [];
+    
+    function simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return hash;
+    }
+
+    const hashA = simpleHash(htmlA);
+    const hashB = simpleHash(htmlB);
+
+    if (hashA !== hashB) {
+        differences.push({
+            type: 'hash_difference',
+            description: 'Conteúdo alterado detectado por hash',
+            hashA: hashA,
+            hashB: hashB,
+            similarity: calculateSimilarity(htmlA, htmlB)
+        });
+    }
+
+    return differences;
+}
+
+function calculateSimilarity(str1, str2) {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    
+    if (longer.length === 0) return 100;
+    
+    const distance = levenshteinDistance(longer, shorter);
+    return Math.round(((longer.length - distance) / longer.length) * 100);
+}
+
+function levenshteinDistance(str1, str2) {
+    const matrix = [];
+    
+    for (let i = 0; i <= str2.length; i++) {
+        matrix[i] = [i];
+    }
+    
+    for (let j = 0; j <= str1.length; j++) {
+        matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= str2.length; i++) {
+        for (let j = 1; j <= str1.length; j++) {
+            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
         }
     }
     
-    return analysis;
+    return matrix[str2.length][str1.length];
 }
+
+// FUNÇÕES DE FORMATAÇÃO DOS RESULTADOS HTML
+
+function formatNormalizedComparison(result) {
+    if (!result.hasDifference) {
+        return `<span class="result-success">✅ HTMLs são estruturalmente idênticos após normalização</span><br><br>
+                <strong>Similaridade:</strong> 100%<br>
+                <strong>Status:</strong> <span class="result-success">Conteúdo equivalente</span>`;
+    }
+
+    let html = `<span class="result-error">❌ HTMLs possuem diferenças estruturais reais</span><br><br>`;
+    html += `<strong>Similaridade após normalização:</strong> ${result.similarity}%<br>`;
+    html += `<strong>Status:</strong> <span class="result-error">Conteúdo diferente</span><br><br>`;
+    
+    html += `<details style="margin-top: 15px;">`;
+    html += `<summary style="cursor: pointer; font-weight: bold; color: #667eea;">Ver HTMLs normalizados</summary>`;
+    html += `<div style="margin-top: 10px;">`;
+    html += `<strong>HTML A normalizado:</strong><br>`;
+    html += `<code style="background: #f8f9fa; padding: 5px; border-radius: 3px; display: block; margin: 5px 0; white-space: pre-wrap; max-height: 100px; overflow-y: auto;">${escapeHtml(result.normalizedA)}</code>`;
+    html += `<strong>HTML B normalizado:</strong><br>`;
+    html += `<code style="background: #f8f9fa; padding: 5px; border-radius: 3px; display: block; margin: 5px 0; white-space: pre-wrap; max-height: 100px; overflow-y: auto;">${escapeHtml(result.normalizedB)}</code>`;
+    html += `</div></details>`;
+
+    return html;
+}
+
+function formatTextComparison(differences) {
+    if (differences.length === 0) {
+        return '<span class="result-success">✅ Nenhuma diferença textual encontrada</span>';
+    }
+
+    let html = `<strong>${differences.length} linha(s) alterada(s):</strong><br><br>`;
+    
+    differences.slice(0, 5).forEach((diff, index) => {
+        let color = diff.type === 'added' ? '#28a745' : diff.type === 'removed' ? '#dc3545' : '#ffc107';
+        let symbol = diff.type === 'added' ? '+' : diff.type === 'removed' ? '-' : '~';
+        
+        html += `<div style="margin-bottom: 10px; padding: 8px; border-left: 3px solid ${color}; background: ${color}15;">`;
+        html += `<strong>Linha ${diff.line}:</strong> <span style="color: ${color};">${symbol}</span><br>`;
+        if (diff.original) html += `<span style="color: #dc3545;">- ${escapeHtml(diff.original.substring(0, 100))}${diff.original.length > 100 ? '...' : ''}</span><br>`;
+        if (diff.modified) html += `<span style="color: #28a745;">+ ${escapeHtml(diff.modified.substring(0, 100))}${diff.modified.length > 100 ? '...' : ''}</span>`;
+        html += `</div>`;
+    });
+
+    if (differences.length > 5) {
+        html += `<small class="result-info">... e mais ${differences.length - 5} diferenças</small>`;
+    }
+
+    return html;
+}
+
+function formatDOMComparison(differences) {
+    if (differences.length === 0) {
+        return '<span class="result-success">✅ Nenhuma diferença estrutural encontrada pelo DOM Comparator</span>';
+    }
+
+    let html = `<strong>${differences.length} operação(ões) detectada(s):</strong><br><br>`;
+    
+    differences.forEach((diff, index) => {
+        html += `<div style="margin-bottom: 10px; padding: 8px; background: #f8f9fa; border-radius: 5px;">`;
+        html += `<strong>Operação ${index + 1}:</strong> ${diff.name || 'desconhecida'}<br>`;
+        if (diff.selectorPath) html += `<strong>Seletor:</strong> ${diff.selectorPath}<br>`;
+        if (diff.content) html += `<strong>Conteúdo:</strong> ${JSON.stringify(diff.content)}<br>`;
+        html += `</div>`;
+    });
+
+    return html;
+}
+
+function formatAttributeComparison(differences) {
+    if (differences.length === 0) {
+        return '<span class="result-success">✅ Nenhuma diferença de atributos encontrada</span>';
+    }
+
+    let html = `<strong>${differences.length} diferença(s) de atributos/estrutura:</strong><br><br>`;
+    
+    differences.slice(0, 10).forEach((diff, index) => {
+        let color = diff.type.includes('added') ? '#28a745' : diff.type.includes('removed') ? '#dc3545' : '#667eea';
+        
+        html += `<div style="margin-bottom: 10px; padding: 8px; border-left: 3px solid ${color}; background: ${color}15;">`;
+        html += `<strong>Tipo:</strong> ${diff.type}<br>`;
+        html += `<strong>Descrição:</strong> ${diff.description}<br>`;
+        if (diff.element) html += `<strong>Elemento:</strong> ${diff.element}<br>`;
+        if (diff.position) html += `<strong>Posição:</strong> ${diff.position}<br>`;
+        html += `</div>`;
+    });
+
+    if (differences.length > 10) {
+        html += `<small class="result-info">... e mais ${differences.length - 10} diferenças</small>`;
+    }
+
+    return html;
+}
+
+function formatHashComparison(differences) {
+    if (differences.length === 0) {
+        return '<span class="result-success">✅ Conteúdo idêntico confirmado por hash</span>';
+    }
+
+    let html = `<strong>Diferença detectada por hash:</strong><br><br>`;
+    
+    differences.forEach((diff, index) => {
+        html += `<div style="padding: 8px; background: #fff3cd; border-radius: 5px; border: 1px solid #ffeaa7;">`;
+        html += `<strong>Hash A:</strong> ${diff.hashA}<br>`;
+        html += `<strong>Hash B:</strong> ${diff.hashB}<br>`;
+        html += `<strong>Similaridade:</strong> ${diff.similarity}%<br>`;
+        html += `<strong>Status:</strong> <span class="result-error">Conteúdo modificado</span>`;
+        html += `</div>`;
+    });
+
+    return html;
+}
+
+// Carrega DOM Comparator da Wingify
+function loadDOMComparator() {
+    const script = document.createElement('script');
+    script.src = 'https://raw.githubusercontent.com/wingify/dom-comparator/master/dist/dom-comparator.min.js';
+    script.onload = function() {
+        console.log('DOM Comparator carregado com sucesso');
+    };
+    script.onerror = function() {
+        console.warn('Erro ao carregar DOM Comparator original - usando métodos alternativos');
+    };
+    document.head.appendChild(script);
+}
+
