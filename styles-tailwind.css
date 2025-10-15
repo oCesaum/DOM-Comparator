@@ -923,3 +923,298 @@ button:hover .fas {
 .absolute.top-6.right-6 {
     z-index: 50 !important;
 }
+
+/* ========================================
+   ESTILOS PARA COMPARAÇÃO LADO A LADO
+   ======================================== */
+
+/* Container da comparação lado a lado */
+#sideBySideComparison {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(6, 182, 212, 0.02) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+#sideBySideComparison:hover {
+    border-color: rgba(59, 130, 246, 0.2);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+}
+
+/* Colunas da comparação */
+#sideBySideContent .grid > div {
+    min-height: 400px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#sideBySideContent .grid > div:hover {
+    transform: translateY(-2px);
+}
+
+/* Scrollbar customizada para as colunas */
+#sideBySideContent .overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sideBySideContent .overflow-y-auto::-webkit-scrollbar-track {
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 3px;
+}
+
+#sideBySideContent .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.3);
+    border-radius: 3px;
+}
+
+#sideBySideContent .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.5);
+}
+
+/* Efeito de hover nos cards de URL */
+#sideBySideContent .group:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Animações para os badges de contagem */
+#sideBySideContent .rounded-full {
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 1280px) {
+    #sideBySideContent .grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    #sideBySideContent .grid > div {
+        min-height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    #sideBySideComparison {
+        padding: 1.5rem;
+    }
+    
+    #sideBySideComparison h3 {
+        font-size: 1.5rem;
+    }
+    
+    #sideBySideContent .grid > div {
+        min-height: 250px;
+        padding: 1rem;
+    }
+}
+
+/* Tema escuro para comparação lado a lado */
+[data-theme="dark"] #sideBySideComparison {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="dark"] #sideBySideComparison:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="dark"] #sideBySideContent .overflow-y-auto::-webkit-scrollbar-track {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="dark"] #sideBySideContent .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="dark"] #sideBySideContent .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.6);
+}
+
+/* ========================================
+   ESTILOS PARA VISUALIZAÇÕES CSS
+   ======================================== */
+
+/* Barras de progresso animadas */
+.progress-bar {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    background-size: 200% 100%;
+    animation: progressShimmer 2s ease-in-out infinite;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes progressShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Indicadores de similaridade */
+.similarity-indicator {
+    position: relative;
+    overflow: hidden;
+}
+
+.similarity-indicator::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Gráficos de pizza CSS */
+.pie-chart {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--color-primary) 0deg 120deg,
+        var(--color-accent) 120deg 240deg,
+        var(--color-warning) 240deg 360deg
+    );
+    animation: pieRotate 3s ease-in-out infinite;
+}
+
+@keyframes pieRotate {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(5deg); }
+}
+
+/* Cards de estatísticas com hover */
+.stats-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+}
+
+.stats-card:hover::before {
+    left: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* Animações de contador */
+.counter-animate {
+    animation: counterPulse 0.6s ease-out;
+}
+
+@keyframes counterPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Barras de comparação responsivas */
+.comparison-bar {
+    position: relative;
+    background: var(--color-surface-light);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.comparison-bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.comparison-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: barShine 2s infinite;
+}
+
+@keyframes barShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Indicadores de status com cores dinâmicas */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.status-indicator.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-indicator.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-indicator.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-indicator.info {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--color-info);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Efeito de loading para gráficos */
+.chart-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: loadingShimmer 1.5s infinite;
+}
+
+@keyframes loadingShimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}

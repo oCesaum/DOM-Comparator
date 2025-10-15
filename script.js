@@ -23,10 +23,18 @@ const sitemapRobot = {
 let siteUrlInput, sitemapUrlInput, fetchSitemapBtn, compareWithSelfBtn, manualSitemapBtn;
 let sitemapATextarea, sitemapBTextarea, compareBtn, analyzeBtn;
 let resultSection, errorSection, operationCount, sitemapStatus, analysisStatus;
-let urlResult, priorityResult, frequencyResult, dateResult, statsResult;
+let urlResult, priorityResult, frequencyResult, dateResult, statsResult, groupingResult;
 let errorMessage, sitemapInfo, analysisInfo, previewA, previewB;
 let themeToggle, themeIcon;
 let notificationPopup, notificationIcon, notificationTitle, notificationMessage, closeNotification;
+let executiveSummary, executiveSummaryContent;
+let sideBySideComparison, sideBySideContent;
+
+// Variáveis globais para filtros e paginação
+let currentPage = 1;
+let itemsPerPage = 25;
+let activeFilters = { type: 'all', search: '' };
+let currentDifferences = null;
 
 // Elementos DOM para comparação de dois sites
 let singleSiteConfig, twoSitesConfig;
@@ -68,12 +76,21 @@ function initializeElements() {
     analysisStatus = document.getElementById('analysisStatus');
     operationCount = document.getElementById('operationCount');
     
+    // Elementos do resumo executivo
+    executiveSummary = document.getElementById('executiveSummary');
+    executiveSummaryContent = document.getElementById('executiveSummaryContent');
+    
+    // Elementos da comparação lado a lado
+    sideBySideComparison = document.getElementById('sideBySideComparison');
+    sideBySideContent = document.getElementById('sideBySideContent');
+    
     // Elementos de resultado específicos
     urlResult = document.getElementById('urlResult');
     priorityResult = document.getElementById('priorityResult');
     frequencyResult = document.getElementById('frequencyResult');
     dateResult = document.getElementById('dateResult');
     statsResult = document.getElementById('statsResult');
+    groupingResult = document.getElementById('groupingResult');
     
     // Elementos de informação
     errorMessage = document.getElementById('errorMessage');
@@ -187,6 +204,70 @@ function setupEventListeners() {
     
     // Evento do botão de fechar notificação
     closeNotification.addEventListener('click', hideNotification);
+    
+    // Event listeners para filtros
+    const urlTypeFilter = document.getElementById('urlTypeFilter');
+    const urlSearch = document.getElementById('urlSearch');
+    const clearFilters = document.getElementById('clearFilters');
+    const itemsPerPageSelect = document.getElementById('itemsPerPage');
+    
+    if (urlTypeFilter) {
+        urlTypeFilter.addEventListener('change', (e) => {
+            activeFilters.type = e.target.value;
+            applyFilters();
+        });
+    }
+    
+    if (urlSearch) {
+        urlSearch.addEventListener('input', (e) => {
+            activeFilters.search = e.target.value;
+            applyFilters();
+        });
+    }
+    
+    if (clearFilters) {
+        clearFilters.addEventListener('click', () => {
+            activeFilters.type = 'all';
+            activeFilters.search = '';
+            urlTypeFilter.value = 'all';
+            urlSearch.value = '';
+            applyFilters();
+        });
+    }
+    
+    if (itemsPerPageSelect) {
+        itemsPerPageSelect.addEventListener('change', (e) => {
+            itemsPerPage = parseInt(e.target.value);
+            currentPage = 1;
+            if (currentDifferences) {
+                applyFilters();
+            }
+        });
+    }
+    
+    // Event listeners para exportação
+    const exportCSVBtn = document.getElementById('exportCSV');
+    const exportJSONBtn = document.getElementById('exportJSON');
+    
+    if (exportCSVBtn) {
+        exportCSVBtn.addEventListener('click', () => {
+            if (currentDifferences && window.lastComparisonStats) {
+                exportToCSV(currentDifferences, window.lastComparisonStats);
+            } else {
+                showError('Nenhuma comparação disponível para exportação. Execute uma comparação primeiro.');
+            }
+        });
+    }
+    
+    if (exportJSONBtn) {
+        exportJSONBtn.addEventListener('click', () => {
+            if (currentDifferences && window.lastComparisonStats) {
+                exportToJSON(currentDifferences, window.lastComparisonStats);
+            } else {
+                showError('Nenhuma comparação disponível para exportação. Execute uma comparação primeiro.');
+            }
+        });
+    }
     
     // Inicializa o tema
     initializeTheme();
@@ -316,12 +397,39 @@ async function compareSitemaps() {
         const dateDiffs = compareDates(parsedA.data, parsedB.data);
         const stats = generateStats(parsedA.data, parsedB.data);
         
+        // Armazena estatísticas globalmente para exportação
+        window.lastComparisonStats = stats;
+        
+        // Gera e exibe resumo executivo
+        const executiveSummary = generateExecutiveSummary(urlDiffs, stats);
+        const executiveSummaryContent = document.getElementById('executiveSummaryContent');
+        const executiveSummarySection = document.getElementById('executiveSummary');
+        
+        if (executiveSummaryContent && executiveSummarySection) {
+            executiveSummaryContent.innerHTML = formatExecutiveSummary(executiveSummary);
+            executiveSummarySection.classList.remove('hidden');
+            executiveSummarySection.classList.add('animate-fade-in');
+        }
+        
         // Exibe resultados
         urlResult.innerHTML = formatUrlComparison(urlDiffs);
         priorityResult.innerHTML = formatPriorityComparison(priorityDiffs);
         frequencyResult.innerHTML = formatFrequencyComparison(frequencyDiffs);
         dateResult.innerHTML = formatDateComparison(dateDiffs);
         statsResult.innerHTML = formatStatsComparison(stats);
+        
+        // Agrupamento inteligente
+        const allUrls = [...urlDiffs.added, ...urlDiffs.removed, ...urlDiffs.modified.map(item => item.original)];
+        const groupedUrls = groupUrlsByPattern(allUrls);
+        groupingResult.innerHTML = formatGroupedUrls(groupedUrls);
+        
+        // Comparação lado a lado
+        if (sideBySideContent && sideBySideComparison) {
+            const sideBySideHtml = createSideBySideComparison(parsedA.data, parsedB.data);
+            sideBySideContent.innerHTML = sideBySideHtml;
+            sideBySideComparison.classList.remove('hidden');
+            sideBySideComparison.classList.add('animate-fade-in');
+        }
 
         // Atualiza contador
         const totalDiffs = urlDiffs.added.length + urlDiffs.removed.length + urlDiffs.modified.length +
@@ -330,6 +438,10 @@ async function compareSitemaps() {
         
         resultSection.classList.remove('hidden');
         resultSection.classList.add('animate-fade-in');
+        
+        // Notificações contextuais
+        const context = analyzeComparisonContext(urlDiffs);
+        showContextualNotifications(context);
 
     } catch (error) {
         showError(`Erro durante a comparação: ${error.message}`);
@@ -545,12 +657,39 @@ async function compareTwoSites() {
         const dateDiffs = compareDates(parsedA.data, parsedB.data);
         const stats = generateStats(parsedA.data, parsedB.data);
         
+        // Armazena estatísticas globalmente para exportação
+        window.lastComparisonStats = stats;
+        
+        // Gera e exibe resumo executivo
+        const executiveSummary = generateExecutiveSummary(urlDiffs, stats);
+        const executiveSummaryContent = document.getElementById('executiveSummaryContent');
+        const executiveSummarySection = document.getElementById('executiveSummary');
+        
+        if (executiveSummaryContent && executiveSummarySection) {
+            executiveSummaryContent.innerHTML = formatExecutiveSummary(executiveSummary);
+            executiveSummarySection.classList.remove('hidden');
+            executiveSummarySection.classList.add('animate-fade-in');
+        }
+        
         // Exibe resultados
         urlResult.innerHTML = formatUrlComparison(urlDiffs);
         priorityResult.innerHTML = formatPriorityComparison(priorityDiffs);
         frequencyResult.innerHTML = formatFrequencyComparison(frequencyDiffs);
         dateResult.innerHTML = formatDateComparison(dateDiffs);
         statsResult.innerHTML = formatStatsComparison(stats);
+        
+        // Agrupamento inteligente
+        const allUrls = [...urlDiffs.added, ...urlDiffs.removed, ...urlDiffs.modified.map(item => item.original)];
+        const groupedUrls = groupUrlsByPattern(allUrls);
+        groupingResult.innerHTML = formatGroupedUrls(groupedUrls);
+        
+        // Comparação lado a lado
+        if (sideBySideContent && sideBySideComparison) {
+            const sideBySideHtml = createSideBySideComparison(parsedA.data, parsedB.data);
+            sideBySideContent.innerHTML = sideBySideHtml;
+            sideBySideComparison.classList.remove('hidden');
+            sideBySideComparison.classList.add('animate-fade-in');
+        }
 
         // Atualiza contador
         const totalDiffs = urlDiffs.added.length + urlDiffs.removed.length + urlDiffs.modified.length +
@@ -559,6 +698,10 @@ async function compareTwoSites() {
         
         resultSection.classList.remove('hidden');
         resultSection.classList.add('animate-fade-in');
+        
+        // Notificações contextuais
+        const context = analyzeComparisonContext(urlDiffs);
+        showContextualNotifications(context);
         
         showSuccess('Comparação Concluída', `Sites comparados com sucesso! ${totalDiffs} diferença${totalDiffs !== 1 ? 's' : ''} encontrada${totalDiffs !== 1 ? 's' : ''}.`);
         
@@ -1048,6 +1191,836 @@ function formatSitemapAnalysis(analysisData) {
     return analysis;
 }
 
+// FUNÇÕES DE FILTROS E BUSCA
+
+// Filtra URLs por tipo de diferença
+function filterUrlsByType(urls, type) {
+    if (type === 'all') return urls;
+    
+    return urls.filter(item => {
+        if (type === 'added') return item.type === 'added';
+        if (type === 'removed') return item.type === 'removed';
+        if (type === 'modified') return item.type === 'modified';
+        return true;
+    });
+}
+
+// Busca URLs por texto
+function searchUrls(urls, searchTerm) {
+    if (!searchTerm || searchTerm.trim() === '') return urls;
+    
+    const term = searchTerm.toLowerCase().trim();
+    return urls.filter(item => {
+        return item.url.toLowerCase().includes(term) ||
+               (item.priority && item.priority.toString().includes(term)) ||
+               (item.frequency && item.frequency.toLowerCase().includes(term)) ||
+               (item.date && item.date.toLowerCase().includes(term));
+    });
+}
+
+// Aplica todos os filtros ativos
+function applyFilters() {
+    if (!currentDifferences) return;
+    
+    let filteredData = [...currentDifferences.all];
+    
+    // Aplicar filtro por tipo
+    if (activeFilters.type !== 'all') {
+        filteredData = filterUrlsByType(filteredData, activeFilters.type);
+    }
+    
+    // Aplicar busca por texto
+    if (activeFilters.search) {
+        filteredData = searchUrls(filteredData, activeFilters.search);
+    }
+    
+    // Atualizar paginação
+    currentPage = 1;
+    updateUrlDisplay(filteredData);
+}
+
+// Atualiza a exibição das URLs com filtros aplicados
+function updateUrlDisplay(filteredData) {
+    const totalItems = filteredData.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageData = filteredData.slice(startIndex, endIndex);
+    
+    // Criar tabela paginada
+    const tableHtml = createPaginatedTable(pageData, currentPage, totalPages, totalItems);
+    urlResult.innerHTML = tableHtml;
+}
+
+// Cria tabela paginada com controles
+function createPaginatedTable(data, currentPage, totalPages, totalItems) {
+    if (data.length === 0) {
+        return '<div class="text-center py-8 text-text-secondary"><i class="fas fa-search mr-2"></i>Nenhum resultado encontrado</div>';
+    }
+    
+    let html = '<div class="overflow-x-auto">';
+    html += '<table class="w-full text-sm border-collapse">';
+    html += '<thead>';
+    html += '<tr class="border-b border-border bg-surface-light">';
+    html += '<th class="text-left p-3 font-semibold text-text">Tipo</th>';
+    html += '<th class="text-left p-3 font-semibold text-text">URL</th>';
+    html += '<th class="text-left p-3 font-semibold text-text">Prioridade</th>';
+    html += '<th class="text-left p-3 font-semibold text-text">Frequência</th>';
+    html += '<th class="text-left p-3 font-semibold text-text">Última Mod.</th>';
+    html += '</tr>';
+    html += '</thead>';
+    html += '<tbody>';
+    
+    data.forEach((item, index) => {
+        const rowClass = index % 2 === 0 ? 'bg-surface' : 'bg-surface-light';
+        const typeColor = item.type === 'added' ? 'text-success' : 
+                         item.type === 'removed' ? 'text-error' : 'text-warning';
+        const typeIcon = item.type === 'added' ? 'fas fa-plus' : 
+                        item.type === 'removed' ? 'fas fa-minus' : 'fas fa-edit';
+        const typeText = item.type === 'added' ? 'Adicionada' : 
+                        item.type === 'removed' ? 'Removida' : 'Modificada';
+        
+        html += `<tr class="${rowClass} border-b border-border-light hover:bg-surface-light transition-colors duration-200">`;
+        html += `<td class="p-3"><span class="${typeColor}"><i class="${typeIcon} mr-2"></i>${typeText}</span></td>`;
+        html += `<td class="p-3 font-mono text-xs break-all">${escapeHtml(item.url)}</td>`;
+        html += `<td class="p-3">${item.priority || 'N/A'}</td>`;
+        html += `<td class="p-3">${item.changefreq || 'N/A'}</td>`;
+        html += `<td class="p-3">${item.lastmod || 'N/A'}</td>`;
+        html += '</tr>';
+    });
+    
+    html += '</tbody>';
+    html += '</table>';
+    html += '</div>';
+    
+    // Controles de paginação
+    html += '<div class="flex justify-between items-center mt-4 pt-4 border-t border-border">';
+    html += `<div class="text-sm text-text-secondary">`;
+    html += `Mostrando ${((currentPage - 1) * itemsPerPage) + 1} a ${Math.min(currentPage * itemsPerPage, totalItems)} de ${totalItems} resultados`;
+    html += '</div>';
+    
+    html += '<div class="flex items-center gap-2">';
+    
+    // Botão Anterior
+    if (currentPage > 1) {
+        html += `<button onclick="changePage(-1)" class="px-3 py-2 bg-secondary text-text rounded-lg hover:bg-secondary-hover transition-colors duration-200">`;
+        html += '<i class="fas fa-chevron-left mr-1"></i>Anterior';
+        html += '</button>';
+    }
+    
+    // Informações da página
+    html += `<span class="px-3 py-2 bg-surface border border-border rounded-lg text-text">`;
+    html += `Página ${currentPage} de ${totalPages}`;
+    html += '</span>';
+    
+    // Botão Próxima
+    if (currentPage < totalPages) {
+        html += `<button onclick="changePage(1)" class="px-3 py-2 bg-secondary text-text rounded-lg hover:bg-secondary-hover transition-colors duration-200">`;
+        html += 'Próxima<i class="fas fa-chevron-right ml-1"></i>';
+        html += '</button>';
+    }
+    
+    html += '</div>';
+    html += '</div>';
+    
+    return html;
+}
+
+// Navega entre páginas
+function changePage(direction) {
+    if (!currentDifferences) return;
+    
+    const filteredData = getFilteredData();
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    
+    const newPage = currentPage + direction;
+    if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        updateUrlDisplay(filteredData);
+    }
+}
+
+// Obtém dados filtrados
+function getFilteredData() {
+    if (!currentDifferences) return [];
+    
+    let filteredData = [...currentDifferences.all];
+    
+    if (activeFilters.type !== 'all') {
+        filteredData = filterUrlsByType(filteredData, activeFilters.type);
+    }
+    
+    if (activeFilters.search) {
+        filteredData = searchUrls(filteredData, activeFilters.search);
+    }
+    
+    return filteredData;
+}
+
+// FUNÇÕES DO RESUMO EXECUTIVO
+
+// Gera resumo executivo inteligente
+function generateExecutiveSummary(urlDiffs, stats) {
+    const totalDifferences = urlDiffs.added.length + urlDiffs.removed.length + urlDiffs.modified.length;
+    const similarity = calculateSiteSimilarity(stats.sitemapA, stats.sitemapB);
+    const recommendations = generateRecommendations(urlDiffs, stats);
+    
+    return {
+        totalDifferences,
+        similarity,
+        recommendations,
+        stats
+    };
+}
+
+// Calcula similaridade entre sites
+function calculateSiteSimilarity(statsA, statsB) {
+    if (statsA.totalUrls === 0 && statsB.totalUrls === 0) return 100;
+    if (statsA.totalUrls === 0 || statsB.totalUrls === 0) return 0;
+    
+    const urlSimilarity = Math.min(statsA.totalUrls, statsB.totalUrls) / Math.max(statsA.totalUrls, statsB.totalUrls) * 100;
+    const prioritySimilarity = Math.abs(statsA.avgPriority - statsB.avgPriority) <= 0.1 ? 100 : Math.max(0, 100 - Math.abs(statsA.avgPriority - statsB.avgPriority) * 50);
+    
+    return Math.round((urlSimilarity + prioritySimilarity) / 2);
+}
+
+// Gera recomendações automáticas
+function generateRecommendations(diffs, stats) {
+    const recommendations = [];
+    
+    // Análise de volume de diferenças
+    if (diffs.added.length > 1000) {
+        recommendations.push({
+            type: 'warning',
+            icon: 'fas fa-exclamation-triangle',
+            title: 'Muitas URLs Adicionadas',
+            message: `Site B tem ${diffs.added.length} URLs que não existem no Site A. Considere usar filtros para focar em categorias específicas.`
+        });
+    }
+    
+    if (diffs.removed.length > 1000) {
+        recommendations.push({
+            type: 'warning',
+            icon: 'fas fa-exclamation-triangle',
+            title: 'Muitas URLs Removidas',
+            message: `${diffs.removed.length} URLs foram removidas do Site A. Verifique se são remoções intencionais.`
+        });
+    }
+    
+    // Análise de similaridade
+    const similarity = calculateSiteSimilarity(stats.sitemapA, stats.sitemapB);
+    if (similarity < 20) {
+        recommendations.push({
+            type: 'info',
+            icon: 'fas fa-info-circle',
+            title: 'Sites Completamente Diferentes',
+            message: 'Os sites não compartilham muitas características. Esta é uma comparação entre sites totalmente diferentes.'
+        });
+    } else if (similarity > 80) {
+        recommendations.push({
+            type: 'success',
+            icon: 'fas fa-check-circle',
+            title: 'Sites Muito Similares',
+            message: 'Os sites são muito similares. As diferenças detectadas são provavelmente pequenas atualizações.'
+        });
+    }
+    
+    // Análise de URLs modificadas
+    if (diffs.modified.length === 0 && (diffs.added.length > 0 || diffs.removed.length > 0)) {
+        recommendations.push({
+            type: 'info',
+            icon: 'fas fa-exchange-alt',
+            title: 'Nenhuma URL Modificada',
+            message: 'Não há URLs em comum entre os sites. Todas as diferenças são adições ou remoções completas.'
+        });
+    }
+    
+    // Análise de prioridades
+    if (Math.abs(stats.sitemapA.avgPriority - stats.sitemapB.avgPriority) > 0.5) {
+        recommendations.push({
+            type: 'warning',
+            icon: 'fas fa-star',
+            title: 'Diferença Significativa de Prioridades',
+            message: 'Os sites têm estratégias de priorização muito diferentes. Considere alinhar as prioridades.'
+        });
+    }
+    
+    return recommendations;
+}
+
+// Formata resumo executivo para exibição
+function formatExecutiveSummary(summary) {
+    let html = '';
+    
+    // Indicadores principais
+    html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">';
+    
+    // Total de diferenças
+    html += '<div class="bg-surface p-6 rounded-xl border border-border text-center stats-card">';
+    html += '<div class="text-3xl font-bold text-primary mb-2 counter-animate">' + summary.totalDifferences + '</div>';
+    html += '<div class="text-sm text-text-secondary">Total de Diferenças</div>';
+    html += '</div>';
+    
+    // Similaridade
+    const similarityColor = summary.similarity > 70 ? 'text-success' : summary.similarity > 40 ? 'text-warning' : 'text-error';
+    html += '<div class="bg-surface p-6 rounded-xl border border-border text-center stats-card similarity-indicator">';
+    html += '<div class="text-3xl font-bold ' + similarityColor + ' mb-2 counter-animate">' + summary.similarity + '%</div>';
+    html += '<div class="text-sm text-text-secondary">Similaridade</div>';
+    html += '</div>';
+    
+    // Recomendações
+    html += '<div class="bg-surface p-6 rounded-xl border border-border text-center stats-card">';
+    html += '<div class="text-3xl font-bold text-accent mb-2 counter-animate">' + summary.recommendations.length + '</div>';
+    html += '<div class="text-sm text-text-secondary">Recomendações</div>';
+    html += '</div>';
+    
+    html += '</div>';
+    
+    // Gráficos de comparação
+    html += '<div class="mb-8">';
+    html += '<h4 class="text-lg font-bold text-text mb-4">Comparação Visual</h4>';
+    html += createComparisonCharts(summary.stats);
+    html += '</div>';
+    
+    // Recomendações
+    if (summary.recommendations.length > 0) {
+        html += '<div class="mb-8">';
+        html += '<h4 class="text-lg font-bold text-text mb-4">Recomendações</h4>';
+        html += '<div class="space-y-4">';
+        
+        summary.recommendations.forEach(rec => {
+            const bgColor = rec.type === 'success' ? 'bg-success/10 border-success/20' :
+                           rec.type === 'warning' ? 'bg-warning/10 border-warning/20' :
+                           rec.type === 'error' ? 'bg-error/10 border-error/20' : 'bg-info/10 border-info/20';
+            const textColor = rec.type === 'success' ? 'text-success' :
+                             rec.type === 'warning' ? 'text-warning' :
+                             rec.type === 'error' ? 'text-error' : 'text-info';
+            
+            html += '<div class="p-4 rounded-xl border ' + bgColor + '">';
+            html += '<div class="flex items-start gap-3">';
+            html += '<i class="' + rec.icon + ' ' + textColor + ' text-xl mt-1"></i>';
+            html += '<div>';
+            html += '<h5 class="font-bold text-text mb-1">' + rec.title + '</h5>';
+            html += '<p class="text-text-secondary text-sm">' + rec.message + '</p>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+        });
+        
+        html += '</div>';
+        html += '</div>';
+    }
+    
+    return html;
+}
+
+// Cria gráficos de comparação com CSS
+function createComparisonCharts(stats) {
+    let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
+    
+    // Gráfico de barras para total de URLs
+    html += '<div class="bg-surface p-4 rounded-xl border border-border">';
+    html += '<h5 class="font-semibold text-text mb-3">Total de URLs</h5>';
+    html += '<div class="space-y-3">';
+    
+    const maxUrls = Math.max(stats.sitemapA.totalUrls, stats.sitemapB.totalUrls);
+    const percentageA = maxUrls > 0 ? (stats.sitemapA.totalUrls / maxUrls) * 100 : 0;
+    const percentageB = maxUrls > 0 ? (stats.sitemapB.totalUrls / maxUrls) * 100 : 0;
+    
+    html += '<div>';
+    html += '<div class="flex justify-between text-sm mb-1">';
+    html += '<span class="text-text">Site A</span>';
+    html += '<span class="text-text font-semibold counter-animate">' + stats.sitemapA.totalUrls + '</span>';
+    html += '</div>';
+    html += '<div class="comparison-bar h-3">';
+    html += '<div class="comparison-bar-fill bg-primary" style="width: ' + percentageA + '%"></div>';
+    html += '</div>';
+    html += '</div>';
+    
+    html += '<div>';
+    html += '<div class="flex justify-between text-sm mb-1">';
+    html += '<span class="text-text">Site B</span>';
+    html += '<span class="text-text font-semibold counter-animate">' + stats.sitemapB.totalUrls + '</span>';
+    html += '</div>';
+    html += '<div class="comparison-bar h-3">';
+    html += '<div class="comparison-bar-fill bg-accent" style="width: ' + percentageB + '%"></div>';
+    html += '</div>';
+    html += '</div>';
+    
+    html += '</div>';
+    html += '</div>';
+    
+    // Gráfico de prioridades médias
+    html += '<div class="bg-surface p-4 rounded-xl border border-border">';
+    html += '<h5 class="font-semibold text-text mb-3">Prioridade Média</h5>';
+    html += '<div class="space-y-3">';
+    
+    const maxPriority = Math.max(stats.sitemapA.avgPriority, stats.sitemapB.avgPriority, 1);
+    const priorityPercentageA = (stats.sitemapA.avgPriority / maxPriority) * 100;
+    const priorityPercentageB = (stats.sitemapB.avgPriority / maxPriority) * 100;
+    
+    html += '<div>';
+    html += '<div class="flex justify-between text-sm mb-1">';
+    html += '<span class="text-text">Site A</span>';
+    html += '<span class="text-text font-semibold counter-animate">' + stats.sitemapA.avgPriority.toFixed(2) + '</span>';
+    html += '</div>';
+    html += '<div class="comparison-bar h-3">';
+    html += '<div class="comparison-bar-fill bg-warning" style="width: ' + priorityPercentageA + '%"></div>';
+    html += '</div>';
+    html += '</div>';
+    
+    html += '<div>';
+    html += '<div class="flex justify-between text-sm mb-1">';
+    html += '<span class="text-text">Site B</span>';
+    html += '<span class="text-text font-semibold counter-animate">' + stats.sitemapB.avgPriority.toFixed(2) + '</span>';
+    html += '</div>';
+    html += '<div class="comparison-bar h-3">';
+    html += '<div class="comparison-bar-fill bg-info" style="width: ' + priorityPercentageB + '%"></div>';
+    html += '</div>';
+    html += '</div>';
+    
+    html += '</div>';
+    html += '</div>';
+    
+    html += '</div>';
+    
+    return html;
+}
+
+// FUNÇÕES DE AGRUPAMENTO INTELIGENTE
+
+// Agrupa URLs por padrões
+function groupUrlsByPattern(urls) {
+    const groups = {
+        homepage: [],
+        blog: [],
+        products: [],
+        categories: [],
+        pages: [],
+        api: [],
+        admin: [],
+        other: []
+    };
+    
+    urls.forEach(item => {
+        const pattern = detectUrlPattern(item.url);
+        groups[pattern].push(item);
+    });
+    
+    return groups;
+}
+
+// Detecta padrão da URL
+function detectUrlPattern(url) {
+    const urlLower = url.toLowerCase();
+    
+    // Homepage
+    if (urlLower === 'https://' + new URL(url).hostname + '/' || 
+        urlLower.endsWith('/') && urlLower.split('/').length === 4) {
+        return 'homepage';
+    }
+    
+    // Blog
+    if (urlLower.includes('/blog/') || 
+        urlLower.includes('/post/') || 
+        urlLower.includes('/article/') ||
+        urlLower.includes('/news/')) {
+        return 'blog';
+    }
+    
+    // Produtos
+    if (urlLower.includes('/product/') || 
+        urlLower.includes('/item/') || 
+        urlLower.includes('/shop/') ||
+        urlLower.includes('/store/')) {
+        return 'products';
+    }
+    
+    // Categorias
+    if (urlLower.includes('/category/') || 
+        urlLower.includes('/cat/') || 
+        urlLower.includes('/categoria/') ||
+        urlLower.includes('/categorias/')) {
+        return 'categories';
+    }
+    
+    // API
+    if (urlLower.includes('/api/') || 
+        urlLower.includes('/rest/') || 
+        urlLower.includes('/graphql/')) {
+        return 'api';
+    }
+    
+    // Admin
+    if (urlLower.includes('/admin/') || 
+        urlLower.includes('/dashboard/') || 
+        urlLower.includes('/manage/')) {
+        return 'admin';
+    }
+    
+    // Páginas
+    if (urlLower.includes('/page/') || 
+        urlLower.includes('/about/') || 
+        urlLower.includes('/contact/') ||
+        urlLower.includes('/help/') ||
+        urlLower.includes('/faq/')) {
+        return 'pages';
+    }
+    
+    return 'other';
+}
+
+// Formata grupos para exibição
+function formatGroupedUrls(groups) {
+    let html = '<div class="space-y-4">';
+    
+    const groupNames = {
+        homepage: { name: 'Homepage', icon: 'fas fa-home', color: 'text-primary' },
+        blog: { name: 'Blog/Notícias', icon: 'fas fa-blog', color: 'text-accent' },
+        products: { name: 'Produtos', icon: 'fas fa-shopping-cart', color: 'text-success' },
+        categories: { name: 'Categorias', icon: 'fas fa-tags', color: 'text-warning' },
+        pages: { name: 'Páginas', icon: 'fas fa-file-alt', color: 'text-info' },
+        api: { name: 'API', icon: 'fas fa-code', color: 'text-error' },
+        admin: { name: 'Admin', icon: 'fas fa-cog', color: 'text-text-secondary' },
+        other: { name: 'Outros', icon: 'fas fa-ellipsis-h', color: 'text-text-muted' }
+    };
+    
+    Object.entries(groups).forEach(([key, urls]) => {
+        if (urls.length === 0) return;
+        
+        const groupInfo = groupNames[key];
+        html += '<div class="bg-surface p-4 rounded-xl border border-border">';
+        html += `<h5 class="font-semibold text-text mb-3 flex items-center gap-2">`;
+        html += `<i class="${groupInfo.icon} ${groupInfo.color}"></i>`;
+        html += `${groupInfo.name} (${urls.length} URL${urls.length !== 1 ? 's' : ''})`;
+        html += '</h5>';
+        
+        html += '<div class="space-y-2 max-h-40 overflow-y-auto">';
+        urls.slice(0, 10).forEach(item => {
+            html += '<div class="flex items-center gap-2 p-2 bg-surface-light rounded-lg">';
+            html += `<span class="text-xs font-mono text-text-secondary break-all">${escapeHtml(item.url)}</span>`;
+            if (item.priority) {
+                html += `<span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded">${item.priority}</span>`;
+            }
+            html += '</div>';
+        });
+        
+        if (urls.length > 10) {
+            html += `<div class="text-center text-sm text-text-secondary py-2">... e mais ${urls.length - 10} URLs</div>`;
+        }
+        
+        html += '</div>';
+        html += '</div>';
+    });
+    
+    html += '</div>';
+    return html;
+}
+
+// FUNÇÕES DE COMPARAÇÃO LADO A LADO
+
+// Cria comparação lado a lado
+function createSideBySideComparison(urlsA, urlsB) {
+    const siteAExclusive = urlsA.filter(urlA => !urlsB.some(urlB => urlB.url === urlA.url));
+    const siteBExclusive = urlsB.filter(urlB => !urlsA.some(urlA => urlA.url === urlB.url));
+    
+    let html = '';
+    
+    // Container principal com grid responsivo
+    html += '<div class="grid grid-cols-1 xl:grid-cols-2 gap-8 h-full">';
+    
+    // Coluna Site A
+    html += '<div class="bg-surface p-6 rounded-2xl border-2 border-primary/20 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col h-full">';
+    html += '<div class="flex items-center justify-between mb-6">';
+    html += '<h4 class="text-primary font-bold text-xl flex items-center gap-3">';
+    html += '<i class="fas fa-globe text-2xl"></i>';
+    html += `Site A - URLs Exclusivas`;
+    html += '</h4>';
+    html += '<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-semibold">' + siteAExclusive.length + '</span>';
+    html += '</div>';
+    html += formatSideColumn(siteAExclusive, 'Site A');
+    html += '</div>';
+    
+    // Coluna Site B
+    html += '<div class="bg-surface p-6 rounded-2xl border-2 border-accent/20 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col h-full">';
+    html += '<div class="flex items-center justify-between mb-6">';
+    html += '<h4 class="text-accent font-bold text-xl flex items-center gap-3">';
+    html += '<i class="fas fa-globe text-2xl"></i>';
+    html += `Site B - URLs Exclusivas`;
+    html += '</h4>';
+    html += '<span class="bg-accent/10 text-accent px-3 py-1 rounded-full text-sm font-semibold">' + siteBExclusive.length + '</span>';
+    html += '</div>';
+    html += formatSideColumn(siteBExclusive, 'Site B');
+    html += '</div>';
+    
+    html += '</div>';
+    
+    return html;
+}
+
+// Formata cada coluna da comparação lado a lado
+function formatSideColumn(urls, siteName) {
+    if (urls.length === 0) {
+        return '<div class="flex-1 flex items-center justify-center text-center py-12 text-text-secondary">' +
+               '<div>' +
+               '<i class="fas fa-check-circle text-4xl mb-4 text-success"></i>' +
+               '<p class="text-lg font-medium">Nenhuma URL exclusiva encontrada</p>' +
+               '<p class="text-sm mt-2 opacity-75">Este site não possui URLs únicas</p>' +
+               '</div>' +
+               '</div>';
+    }
+    
+    let html = '<div class="flex-1 space-y-3 overflow-y-auto pr-2">';
+    
+    urls.slice(0, 50).forEach((item, index) => {
+        const bgColor = index % 2 === 0 ? 'bg-surface-light' : 'bg-surface';
+        const siteColor = siteName === 'Site A' ? 'border-primary/30' : 'border-accent/30';
+        
+        html += '<div class="p-4 rounded-xl border-2 ' + bgColor + ' ' + siteColor + ' hover:shadow-lg hover:scale-102 transition-all duration-200 group">';
+        html += '<div class="flex items-start justify-between gap-4">';
+        html += '<div class="flex-1 min-w-0">';
+        html += '<div class="text-sm font-mono text-text break-all mb-3 leading-relaxed">' + escapeHtml(item.url) + '</div>';
+        
+        // Metadados em layout mais organizado
+        html += '<div class="flex flex-wrap gap-2">';
+        if (item.priority) {
+            html += '<span class="bg-primary/15 text-primary px-3 py-1 rounded-full text-xs font-medium border border-primary/20">' +
+                   '<i class="fas fa-star mr-1"></i>Prioridade: ' + item.priority + '</span>';
+        }
+        if (item.changefreq) {
+            html += '<span class="bg-accent/15 text-accent px-3 py-1 rounded-full text-xs font-medium border border-accent/20">' +
+                   '<i class="fas fa-sync-alt mr-1"></i>' + item.changefreq + '</span>';
+        }
+        if (item.lastmod) {
+            html += '<span class="bg-warning/15 text-warning px-3 py-1 rounded-full text-xs font-medium border border-warning/20">' +
+                   '<i class="fas fa-calendar-alt mr-1"></i>' + item.lastmod + '</span>';
+        }
+        html += '</div>';
+        
+        html += '</div>';
+        html += '<div class="flex-shrink-0">';
+        html += '<button onclick="copyToClipboard(\'' + escapeHtml(item.url) + '\')" class="text-text-secondary hover:text-primary transition-all duration-200 p-2 rounded-lg hover:bg-primary/10 group-hover:scale-110" title="Copiar URL">';
+        html += '<i class="fas fa-copy text-lg"></i>';
+        html += '</button>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+    });
+    
+    if (urls.length > 50) {
+        html += '<div class="text-center py-6 text-text-secondary border-t-2 border-border mt-4">';
+        html += '<div class="bg-surface-light rounded-xl p-4">';
+        html += '<i class="fas fa-ellipsis-h text-2xl mb-2"></i>';
+        html += '<p class="font-medium">... e mais ' + (urls.length - 50) + ' URLs</p>';
+        html += '<p class="text-xs mt-1 opacity-75">Mostrando apenas as primeiras 50</p>';
+        html += '</div>';
+        html += '</div>';
+    }
+    
+    html += '</div>';
+    return html;
+}
+
+// Copia URL para clipboard
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showSuccess('URL Copiada', 'URL copiada para a área de transferência!');
+    }).catch(() => {
+        // Fallback para navegadores mais antigos
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showSuccess('URL Copiada', 'URL copiada para a área de transferência!');
+    });
+}
+
+// FUNÇÕES DE NOTIFICAÇÕES CONTEXTUAIS
+
+// Analisa contexto da comparação
+function analyzeComparisonContext(diffs) {
+    const context = {
+        totalDifferences: diffs.added.length + diffs.removed.length + diffs.modified.length,
+        hasManyDifferences: false,
+        isCompletelyDifferent: false,
+        hasLargeDataset: false,
+        recommendations: []
+    };
+    
+    // Análise de volume
+    if (context.totalDifferences > 1000) {
+        context.hasManyDifferences = true;
+        context.recommendations.push({
+            type: 'warning',
+            message: 'Muitas diferenças detectadas. Considere usar filtros para focar em categorias específicas.'
+        });
+    }
+    
+    // Análise de sites completamente diferentes
+    if (diffs.modified.length === 0 && (diffs.added.length > 0 && diffs.removed.length > 0)) {
+        context.isCompletelyDifferent = true;
+        context.recommendations.push({
+            type: 'info',
+            message: 'Os sites não compartilham URLs em comum. Esta é uma comparação entre sites totalmente diferentes.'
+        });
+    }
+    
+    // Análise de dataset grande
+    if (context.totalDifferences > 500) {
+        context.hasLargeDataset = true;
+        context.recommendations.push({
+            type: 'info',
+            message: 'Dataset grande detectado. Use a paginação e filtros para navegar pelos resultados.'
+        });
+    }
+    
+    return context;
+}
+
+// Mostra notificações contextuais apropriadas
+function showContextualNotifications(context) {
+    // Aguardar um pouco para não sobrecarregar o usuário
+    setTimeout(() => {
+        context.recommendations.forEach((rec, index) => {
+            setTimeout(() => {
+                if (rec.type === 'warning') {
+                    showWarning('Análise Contextual', rec.message);
+                } else if (rec.type === 'info') {
+                    showInfo('Dica de Uso', rec.message);
+                } else if (rec.type === 'success') {
+                    showSuccess('Análise Concluída', rec.message);
+                }
+            }, index * 2000); // Espaçar as notificações
+        });
+    }, 1000);
+}
+
+// FUNÇÕES DE EXPORTAÇÃO
+
+// Exporta dados para CSV
+function exportToCSV(differences, stats) {
+    const exportData = prepareExportData(differences, stats);
+    
+    // Cabeçalho CSV
+    const headers = ['Tipo', 'URL', 'Prioridade', 'Frequência', 'Última Modificação', 'Site Origem'];
+    let csvContent = headers.join(',') + '\n';
+    
+    // Dados das diferenças
+    exportData.differences.forEach(item => {
+        const row = [
+            `"${item.type}"`,
+            `"${item.url}"`,
+            `"${item.priority || 'N/A'}"`,
+            `"${item.frequency || 'N/A'}"`,
+            `"${item.date || 'N/A'}"`,
+            `"${item.site || 'N/A'}"`
+        ];
+        csvContent += row.join(',') + '\n';
+    });
+    
+    // Adicionar estatísticas
+    csvContent += '\n# ESTATÍSTICAS\n';
+    csvContent += 'Métrica,Site A,Site B,Diferença\n';
+    csvContent += `"Total de URLs","${stats.sitemapA.totalUrls}","${stats.sitemapB.totalUrls}","${stats.comparison.urlDifference}"\n`;
+    csvContent += `"Prioridade Média","${stats.sitemapA.avgPriority}","${stats.sitemapB.avgPriority}","${stats.comparison.priorityDifference.toFixed(2)}"\n`;
+    csvContent += `"Datas Diferentes","${stats.comparison.dateDifference ? 'Sim' : 'Não'}","",""\n`;
+    
+    const filename = `comparacao-sitemaps-${new Date().toISOString().split('T')[0]}.csv`;
+    downloadFile(csvContent, filename, 'text/csv');
+}
+
+// Exporta dados para JSON
+function exportToJSON(differences, stats) {
+    const exportData = prepareExportData(differences, stats);
+    
+    const jsonData = {
+        metadata: {
+            exportDate: new Date().toISOString(),
+            totalDifferences: exportData.differences.length,
+            comparisonType: 'sitemap'
+        },
+        statistics: {
+            siteA: stats.sitemapA,
+            siteB: stats.sitemapB,
+            comparison: stats.comparison
+        },
+        differences: exportData.differences,
+        summary: {
+            added: differences.added.length,
+            removed: differences.removed.length,
+            modified: differences.modified.length
+        }
+    };
+    
+    const jsonContent = JSON.stringify(jsonData, null, 2);
+    const filename = `comparacao-sitemaps-${new Date().toISOString().split('T')[0]}.json`;
+    downloadFile(jsonContent, filename, 'application/json');
+}
+
+// Prepara dados para exportação
+function prepareExportData(differences, stats) {
+    const exportDifferences = [];
+    
+    // URLs adicionadas
+    differences.added.forEach(item => {
+        exportDifferences.push({
+            type: 'Adicionada',
+            url: item.url,
+            priority: item.priority || null,
+            frequency: item.changefreq || null,
+            date: item.lastmod || null,
+            site: 'Site B'
+        });
+    });
+    
+    // URLs removidas
+    differences.removed.forEach(item => {
+        exportDifferences.push({
+            type: 'Removida',
+            url: item.url,
+            priority: item.priority || null,
+            frequency: item.changefreq || null,
+            date: item.lastmod || null,
+            site: 'Site A'
+        });
+    });
+    
+    // URLs modificadas
+    differences.modified.forEach(item => {
+        exportDifferences.push({
+            type: 'Modificada',
+            url: item.url,
+            priority: `${item.original.priority || 'N/A'} → ${item.modified.priority || 'N/A'}`,
+            frequency: `${item.original.changefreq || 'N/A'} → ${item.modified.changefreq || 'N/A'}`,
+            date: `${item.original.lastmod || 'N/A'} → ${item.modified.lastmod || 'N/A'}`,
+            site: 'Ambos'
+        });
+    });
+    
+    return {
+        differences: exportDifferences,
+        stats: stats
+    };
+}
+
+// Gerencia download de arquivos
+function downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    showSuccess('Exportação Concluída', `Arquivo ${filename} baixado com sucesso!`);
+}
+
 // FUNÇÕES DE FORMATAÇÃO DE RESULTADOS
 
 function formatUrlComparison(diffs) {
@@ -1055,45 +2028,25 @@ function formatUrlComparison(diffs) {
         return '<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Nenhuma diferença de URLs encontrada</span>';
     }
     
-    let html = '<strong>Diferenças de URLs:</strong><br><br>';
+    // Preparar dados para o novo sistema
+    const allDifferences = [
+        ...diffs.added.map(item => ({ ...item, type: 'added' })),
+        ...diffs.removed.map(item => ({ ...item, type: 'removed' })),
+        ...diffs.modified.map(item => ({ ...item, type: 'modified' }))
+    ];
     
-    if (diffs.added.length > 0) {
-        html += `<div style="color: #28a745; margin-bottom: 10px;">`;
-        html += `<strong>+ ${diffs.added.length} URL(s) adicionada(s):</strong><br>`;
-        diffs.added.slice(0, 5).forEach(item => {
-            html += `• ${escapeHtml(item.url)}<br>`;
-        });
-        if (diffs.added.length > 5) {
-            html += `... e mais ${diffs.added.length - 5} URLs`;
-        }
-        html += `</div>`;
-    }
+    // Armazenar diferenças globalmente para filtros
+    currentDifferences = {
+        all: allDifferences,
+        added: diffs.added,
+        removed: diffs.removed,
+        modified: diffs.modified
+    };
     
-    if (diffs.removed.length > 0) {
-        html += `<div style="color: #dc3545; margin-bottom: 10px;">`;
-        html += `<strong>- ${diffs.removed.length} URL(s) removida(s):</strong><br>`;
-        diffs.removed.slice(0, 5).forEach(item => {
-            html += `• ${escapeHtml(item.url)}<br>`;
-        });
-        if (diffs.removed.length > 5) {
-            html += `... e mais ${diffs.removed.length - 5} URLs`;
-        }
-        html += `</div>`;
-    }
+    // Aplicar filtros e exibir
+    applyFilters();
     
-    if (diffs.modified.length > 0) {
-        html += `<div style="color: #ffc107; margin-bottom: 10px;">`;
-        html += `<strong>~ ${diffs.modified.length} URL(s) modificada(s):</strong><br>`;
-        diffs.modified.slice(0, 3).forEach(item => {
-            html += `• ${escapeHtml(item.url)}<br>`;
-        });
-        if (diffs.modified.length > 3) {
-            html += `... e mais ${diffs.modified.length - 3} URLs`;
-        }
-        html += `</div>`;
-    }
-
-    return html;
+    return ''; // O conteúdo será gerado pela função updateUrlDisplay
 }
 
 function formatPriorityComparison(diffs) {
@@ -1910,6 +2863,10 @@ async function compareHTML() {
         
         resultSection.classList.remove('hidden');
         resultSection.classList.add('animate-fade-in');
+        
+        // Notificações contextuais
+        const context = analyzeComparisonContext(urlDiffs);
+        showContextualNotifications(context);
 
     } catch (error) {
         showError(`Erro durante a comparação: ${error.message}`);

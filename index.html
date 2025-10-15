@@ -355,11 +355,49 @@
                 <div id="analysisInfo" class="text-base text-text-secondary leading-relaxed"></div>
             </section>
 
+            <!-- Resumo Executivo -->
+            <section id="executiveSummary" class="mt-10 p-8 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 rounded-2xl border-2 border-primary/20 hidden hover:border-primary/30 transition-all duration-200">
+                <div class="flex items-center mb-6">
+                    <i class="fas fa-chart-line text-3xl mr-3 text-primary"></i>
+                    <h3 class="text-2xl font-bold text-text">Resumo Executivo</h3>
+                </div>
+                <div id="executiveSummaryContent" class="space-y-6">
+                    <!-- Conteúdo será gerado dinamicamente -->
+                </div>
+            </section>
+
+            <!-- Comparação Lado a Lado -->
+            <section id="sideBySideComparison" class="mt-10 p-8 bg-surface-light rounded-2xl border border-border hidden hover:border-border-light transition-all duration-200 shadow-lg">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center">
+                        <i class="fas fa-columns text-3xl mr-3 text-accent"></i>
+                        <h3 class="text-2xl font-bold text-text">Comparação Lado a Lado</h3>
+                    </div>
+                    <div class="text-sm text-text-secondary">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        URLs exclusivas de cada site
+                    </div>
+                </div>
+                <div id="sideBySideContent" class="min-h-96">
+                    <!-- Conteúdo será gerado dinamicamente -->
+                </div>
+            </section>
+
             <!-- Resultados -->
             <section id="resultSection" class="mt-10 p-8 bg-surface-light rounded-2xl border border-border hidden hover:border-border-light transition-all duration-200">
-                <div class="flex items-center mb-8">
-                    <span id="operationCount" class="bg-primary text-white px-6 py-3 rounded-full font-bold mr-6 text-lg">0 diferenças</span>
-                    <h3 class="text-2xl font-bold text-text">Análise Completa dos Sitemaps</h3>
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center">
+                        <span id="operationCount" class="bg-primary text-white px-6 py-3 rounded-full font-bold mr-6 text-lg">0 diferenças</span>
+                        <h3 class="text-2xl font-bold text-text">Análise Completa dos Sitemaps</h3>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="exportCSV" class="px-4 py-2 bg-success text-white rounded-lg hover:bg-success/90 transition-colors duration-200">
+                            <i class="fas fa-file-csv mr-2"></i>Exportar CSV
+                        </button>
+                        <button id="exportJSON" class="px-4 py-2 bg-info text-white rounded-lg hover:bg-info/90 transition-colors duration-200">
+                            <i class="fas fa-file-code mr-2"></i>Exportar JSON
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="space-y-6 mb-10">
@@ -369,6 +407,39 @@
                         <div class="bg-surface p-6 rounded-2xl border-2 border-primary transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-primary-hover">
                             <h4 class="text-primary font-bold mb-4 text-xl"><i class="fas fa-link mr-2"></i>Comparação de URLs</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Detecta URLs adicionadas, removidas ou modificadas no sitemap.</p>
+                            
+                            <!-- Controles de Filtro -->
+                            <div class="mb-4 p-4 bg-surface-light rounded-xl border border-border">
+                                <div class="flex flex-wrap gap-4 items-center">
+                                    <div class="flex items-center gap-2">
+                                        <label for="urlTypeFilter" class="text-sm font-semibold text-text">Filtrar por:</label>
+                                        <select id="urlTypeFilter" class="px-3 py-2 border border-border rounded-lg bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40">
+                                            <option value="all">Todas as diferenças</option>
+                                            <option value="added">URLs Adicionadas</option>
+                                            <option value="removed">URLs Removidas</option>
+                                            <option value="modified">URLs Modificadas</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <label for="urlSearch" class="text-sm font-semibold text-text">Buscar:</label>
+                                        <input type="text" id="urlSearch" placeholder="Digite para buscar URLs..." 
+                                               class="px-3 py-2 border border-border rounded-lg bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 w-64">
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <label for="itemsPerPage" class="text-sm font-semibold text-text">Por página:</label>
+                                        <select id="itemsPerPage" class="px-3 py-2 border border-border rounded-lg bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40">
+                                            <option value="10">10</option>
+                                            <option value="25" selected>25</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                        </select>
+                                    </div>
+                                    <button id="clearFilters" class="px-4 py-2 bg-secondary text-text rounded-lg hover:bg-secondary-hover transition-colors duration-200">
+                                        <i class="fas fa-times mr-2"></i>Limpar Filtros
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <div id="urlResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
 
@@ -398,6 +469,13 @@
                             <h4 class="text-text font-bold mb-4 text-xl"><i class="fas fa-chart-pie mr-2"></i>Estatísticas Gerais</h4>
                             <p class="text-text-secondary mb-6 text-base leading-relaxed">Mostra estatísticas comparativas dos dois sitemaps.</p>
                             <div id="statsResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
+                        </div>
+
+                        <!-- Método 6: Agrupamento Inteligente -->
+                        <div class="bg-surface p-6 rounded-2xl border-2 border-accent transition-all duration-200 opacity-0 transform translate-y-8 animate-card-slide-in hover:-translate-y-1 hover:scale-102 hover:shadow-xl hover:border-accent-hover">
+                            <h4 class="text-accent font-bold mb-4 text-xl"><i class="fas fa-layer-group mr-2"></i>Agrupamento Inteligente</h4>
+                            <p class="text-text-secondary mb-6 text-base leading-relaxed">Agrupa URLs por padrões comuns para facilitar a análise.</p>
+                            <div id="groupingResult" class="bg-surface-light p-4 rounded-xl mt-4 font-mono text-sm max-h-64 overflow-y-auto border border-border"></div>
                         </div>
                     </div>
 
