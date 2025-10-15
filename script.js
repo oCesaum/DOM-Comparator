@@ -1391,14 +1391,20 @@ function showNotification(title, message, type = 'info', duration = 5000) {
     };
     
     // Atualiza conteúdo da notificação
-    notificationIcon.textContent = icons[type] || icons.info;
+    notificationIcon.innerHTML = icons[type] || icons.info;
     notificationTitle.textContent = title;
     notificationMessage.textContent = message;
     
-    // Aplica cor da borda baseada no tipo
+    // Remove classes de tipo anteriores e aplica a nova
+    notificationPopup.className = notificationPopup.className.replace(/border-\w+/, '');
+    notificationPopup.classList.add(colors[type] || colors.info);
+    
+    // Aplica cor da borda baseada no tipo no conteúdo interno
     const popupContent = notificationPopup.querySelector('.bg-surface-light');
-    popupContent.className = popupContent.className.replace(/border-\w+/, '');
-    popupContent.classList.add('border', colors[type] || colors.info);
+    if (popupContent) {
+        popupContent.className = popupContent.className.replace(/border-\w+/, '');
+        popupContent.classList.add('border', colors[type] || colors.info);
+    }
     
     // Mostra a notificação
     notificationPopup.classList.remove('translate-x-full', 'opacity-0');
@@ -1499,10 +1505,80 @@ const htmlExamples = {
     }
 };
 
+// Atualiza os labels dos campos de entrada baseado no modo selecionado
+function updateInputLabels() {
+    const selectedMode = document.querySelector('input[name="comparatorMode"]:checked').value;
+    
+    // Encontra especificamente os labels dos campos de entrada (não os da interface HTML)
+    const inputLabels = document.querySelectorAll('.grid.grid-cols-1.lg\\:grid-cols-2.gap-8.mb-10 h3.text-primary.mb-4.text-2xl.font-bold');
+    
+    inputLabels.forEach(label => {
+        const text = label.textContent.trim();
+        
+        if (selectedMode === 'html') {
+            // Muda de Sitemap para HTML
+            if (text.includes('Sitemap A (Original)')) {
+                label.textContent = 'HTML A (Original) *';
+            } else if (text.includes('Sitemap B (Comparação)')) {
+                label.textContent = 'HTML B (Comparação) *';
+            }
+        } else if (selectedMode === 'sitemap') {
+            // Muda de HTML para Sitemap
+            if (text.includes('HTML A (Original)')) {
+                label.textContent = 'Sitemap A (Original) *';
+            } else if (text.includes('HTML B (Comparação)')) {
+                label.textContent = 'Sitemap B (Comparação) *';
+            }
+        }
+    });
+    
+    // Atualiza os placeholders dos textareas
+    updateTextareaPlaceholders(selectedMode);
+    
+    // Atualiza os labels de prévia
+    updatePreviewLabels(selectedMode);
+}
+
+// Atualiza os placeholders dos textareas baseado no modo selecionado
+function updateTextareaPlaceholders(mode) {
+    const sitemapATextarea = document.getElementById('sitemapA');
+    const sitemapBTextarea = document.getElementById('sitemapB');
+    
+    if (mode === 'html') {
+        sitemapATextarea.placeholder = 'Cole aqui o HTML original...';
+        sitemapBTextarea.placeholder = 'Cole aqui o HTML para comparação...';
+    } else if (mode === 'sitemap') {
+        sitemapATextarea.placeholder = 'Cole aqui o sitemap original ou deixe o robô buscar...';
+        sitemapBTextarea.placeholder = 'Cole aqui o sitemap para comparação...';
+    }
+}
+
+// Atualiza os labels de prévia baseado no modo selecionado
+function updatePreviewLabels(mode) {
+    const previewLabels = document.querySelectorAll('.text-text-secondary.text-sm.mb-3.uppercase.tracking-wide.font-semibold');
+    
+    previewLabels.forEach(label => {
+        const text = label.textContent.trim();
+        
+        if (mode === 'html') {
+            if (text === 'Prévia do Sitemap:') {
+                label.textContent = 'Prévia do HTML:';
+            }
+        } else if (mode === 'sitemap') {
+            if (text === 'Prévia do HTML:') {
+                label.textContent = 'Prévia do Sitemap:';
+            }
+        }
+    });
+}
+
 // Alterna entre modos de comparação
 function switchComparatorMode() {
     const selectedMode = document.querySelector('input[name="comparatorMode"]:checked').value;
     console.log('Alternando para modo:', selectedMode);
+    
+    // Atualiza os labels primeiro
+    updateInputLabels();
     
     if (selectedMode === 'sitemap') {
         // Mostra interface do sitemap - seção de configuração
@@ -1510,7 +1586,7 @@ function switchComparatorMode() {
         console.log('Seções encontradas:', sections.length);
         sections.forEach(section => {
             const h2 = section.querySelector('h2');
-            if (h2 && h2.textContent.includes('🌐 Configuração do Site')) {
+            if (h2 && h2.textContent.includes('Configuração do Site')) {
                 console.log('Mostrando seção de configuração do site');
                 section.style.display = 'block';
             }
@@ -1531,8 +1607,13 @@ function switchComparatorMode() {
             }
         });
         
+        // Mostra seções de status de sitemap
+        sitemapStatus.classList.remove('hidden');
+        analysisStatus.classList.remove('hidden');
+        
         // Oculta interface do HTML
         htmlComparatorInterface.classList.add('hidden');
+        normalizationStatus.classList.add('hidden');
         
         // Mostra métodos do sitemap
         sitemapMethods.classList.remove('hidden');
@@ -1547,7 +1628,7 @@ function switchComparatorMode() {
         const sections = document.querySelectorAll('section.bg-surface-light.p-8.rounded-2xl.mb-10');
         sections.forEach(section => {
             const h2 = section.querySelector('h2');
-            if (h2 && h2.textContent.includes('🌐 Configuração do Site')) {
+            if (h2 && h2.textContent.includes('Configuração do Site')) {
                 section.style.display = 'none';
             }
         });
@@ -1566,6 +1647,10 @@ function switchComparatorMode() {
                 section.style.display = 'none';
             }
         });
+        
+        // Oculta seções de status de sitemap
+        sitemapStatus.classList.add('hidden');
+        analysisStatus.classList.add('hidden');
         
         // Mostra interface do HTML
         htmlComparatorInterface.classList.remove('hidden');
@@ -1646,67 +1731,6 @@ function normalizeTagCase(html) {
     });
 }
 
-// ========================================
-// SISTEMA DE NOTIFICAÇÕES
-// ========================================
-
-// Mostra notificação no canto inferior direito
-function showNotification(title, message, type = 'info', duration = 5000) {
-    // Define ícone e cores baseado no tipo
-    const icons = {
-        'error': '<i class="fas fa-exclamation-triangle"></i>',
-        'success': '<i class="fas fa-check-circle"></i>',
-        'warning': '<i class="fas fa-exclamation-triangle"></i>',
-        'info': '<i class="fas fa-info-circle"></i>'
-    };
-    
-    const colors = {
-        'error': 'border-error',
-        'success': 'border-success',
-        'warning': 'border-warning',
-        'info': 'border-info'
-    };
-    
-    // Atualiza conteúdo da notificação
-    notificationIcon.textContent = icons[type] || icons.info;
-    notificationTitle.textContent = title;
-    notificationMessage.textContent = message;
-    
-    // Aplica cor da borda baseada no tipo
-    const popupContent = notificationPopup.querySelector('.bg-surface-light');
-    popupContent.className = popupContent.className.replace(/border-\w+/, '');
-    popupContent.classList.add('border', colors[type] || colors.info);
-    
-    // Mostra a notificação
-    notificationPopup.classList.remove('translate-x-full', 'opacity-0');
-    notificationPopup.classList.add('translate-x-0', 'opacity-100');
-    
-    // Auto-hide após duração especificada
-    setTimeout(() => {
-        hideNotification();
-    }, duration);
-}
-
-// Esconde a notificação
-function hideNotification() {
-    notificationPopup.classList.remove('translate-x-0', 'opacity-100');
-    notificationPopup.classList.add('translate-x-full', 'opacity-0');
-}
-
-// Funções de conveniência para diferentes tipos de notificação
-function showSuccess(title, message, duration = 3000) {
-    showNotification(title, message, 'success', duration);
-}
-
-function showWarning(title, message, duration = 4000) {
-    showNotification(title, message, 'warning', duration);
-}
-
-function showInfo(title, message, duration = 4000) {
-    showNotification(title, message, 'info', duration);
-}
-
-// Normaliza espaços em branco e formatação
 function normalizeWhitespaceAndFormatting(html) {
     // Remove quebras de linha e espaços extras
     let normalized = html.replace(/\s+/g, ' ').trim();
@@ -1761,67 +1785,6 @@ function normalizeAttributeOrder(html) {
     });
 }
 
-// ========================================
-// SISTEMA DE NOTIFICAÇÕES
-// ========================================
-
-// Mostra notificação no canto inferior direito
-function showNotification(title, message, type = 'info', duration = 5000) {
-    // Define ícone e cores baseado no tipo
-    const icons = {
-        'error': '<i class="fas fa-exclamation-triangle"></i>',
-        'success': '<i class="fas fa-check-circle"></i>',
-        'warning': '<i class="fas fa-exclamation-triangle"></i>',
-        'info': '<i class="fas fa-info-circle"></i>'
-    };
-    
-    const colors = {
-        'error': 'border-error',
-        'success': 'border-success',
-        'warning': 'border-warning',
-        'info': 'border-info'
-    };
-    
-    // Atualiza conteúdo da notificação
-    notificationIcon.textContent = icons[type] || icons.info;
-    notificationTitle.textContent = title;
-    notificationMessage.textContent = message;
-    
-    // Aplica cor da borda baseada no tipo
-    const popupContent = notificationPopup.querySelector('.bg-surface-light');
-    popupContent.className = popupContent.className.replace(/border-\w+/, '');
-    popupContent.classList.add('border', colors[type] || colors.info);
-    
-    // Mostra a notificação
-    notificationPopup.classList.remove('translate-x-full', 'opacity-0');
-    notificationPopup.classList.add('translate-x-0', 'opacity-100');
-    
-    // Auto-hide após duração especificada
-    setTimeout(() => {
-        hideNotification();
-    }, duration);
-}
-
-// Esconde a notificação
-function hideNotification() {
-    notificationPopup.classList.remove('translate-x-0', 'opacity-100');
-    notificationPopup.classList.add('translate-x-full', 'opacity-0');
-}
-
-// Funções de conveniência para diferentes tipos de notificação
-function showSuccess(title, message, duration = 3000) {
-    showNotification(title, message, 'success', duration);
-}
-
-function showWarning(title, message, duration = 4000) {
-    showNotification(title, message, 'warning', duration);
-}
-
-function showInfo(title, message, duration = 4000) {
-    showNotification(title, message, 'info', duration);
-}
-
-// Atualiza prévia em tempo real
 function updatePreview() {
     const htmlA = htmlATextarea.value;
     const htmlB = htmlBTextarea.value;
@@ -2392,65 +2355,3 @@ function applyThemeClasses(theme) {
     // As cores são aplicadas via CSS com [data-theme="dark"]
     // Não precisamos mais manipular classes manualmente
 }
-
-
-// ========================================
-// SISTEMA DE NOTIFICAÇÕES
-// ========================================
-
-// Mostra notificação no canto inferior direito
-function showNotification(title, message, type = 'info', duration = 5000) {
-    // Define ícone e cores baseado no tipo
-    const icons = {
-        'error': '<i class="fas fa-exclamation-triangle"></i>',
-        'success': '<i class="fas fa-check-circle"></i>',
-        'warning': '<i class="fas fa-exclamation-triangle"></i>',
-        'info': '<i class="fas fa-info-circle"></i>'
-    };
-    
-    const colors = {
-        'error': 'border-error',
-        'success': 'border-success',
-        'warning': 'border-warning',
-        'info': 'border-info'
-    };
-    
-    // Atualiza conteúdo da notificação
-    notificationIcon.textContent = icons[type] || icons.info;
-    notificationTitle.textContent = title;
-    notificationMessage.textContent = message;
-    
-    // Aplica cor da borda baseada no tipo
-    const popupContent = notificationPopup.querySelector('.bg-surface-light');
-    popupContent.className = popupContent.className.replace(/border-\w+/, '');
-    popupContent.classList.add('border', colors[type] || colors.info);
-    
-    // Mostra a notificação
-    notificationPopup.classList.remove('translate-x-full', 'opacity-0');
-    notificationPopup.classList.add('translate-x-0', 'opacity-100');
-    
-    // Auto-hide após duração especificada
-    setTimeout(() => {
-        hideNotification();
-    }, duration);
-}
-
-// Esconde a notificação
-function hideNotification() {
-    notificationPopup.classList.remove('translate-x-0', 'opacity-100');
-    notificationPopup.classList.add('translate-x-full', 'opacity-0');
-}
-
-// Funções de conveniência para diferentes tipos de notificação
-function showSuccess(title, message, duration = 3000) {
-    showNotification(title, message, 'success', duration);
-}
-
-function showWarning(title, message, duration = 4000) {
-    showNotification(title, message, 'warning', duration);
-}
-
-function showInfo(title, message, duration = 4000) {
-    showNotification(title, message, 'info', duration);
-}
-
