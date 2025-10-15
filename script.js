@@ -28,6 +28,12 @@ let errorMessage, sitemapInfo, analysisInfo, previewA, previewB;
 let themeToggle, themeIcon;
 let notificationPopup, notificationIcon, notificationTitle, notificationMessage, closeNotification;
 
+// Elementos DOM para comparação de dois sites
+let singleSiteConfig, twoSitesConfig;
+let siteUrlAInput, sitemapUrlAInput, fetchSitemapABtn;
+let siteUrlBInput, sitemapUrlBInput, fetchSitemapBBtn;
+let compareTwoSitesBtn, manualSitemapABtn, manualSitemapBBtn;
+
 // Elementos DOM do Comparador HTML
 let htmlComparatorInterface, htmlATextarea, htmlBTextarea, compareHtmlBtn, previewBtn;
 let normalizedA, normalizedB, normalizationStatus, normalizationInfo;
@@ -87,6 +93,19 @@ function initializeElements() {
     notificationMessage = document.getElementById('notificationMessage');
     closeNotification = document.getElementById('closeNotification');
     
+    // Elementos para comparação de dois sites
+    singleSiteConfig = document.getElementById('singleSiteConfig');
+    twoSitesConfig = document.getElementById('twoSitesConfig');
+    siteUrlAInput = document.getElementById('siteUrlA');
+    sitemapUrlAInput = document.getElementById('sitemapUrlA');
+    fetchSitemapABtn = document.getElementById('fetchSitemapABtn');
+    siteUrlBInput = document.getElementById('siteUrlB');
+    sitemapUrlBInput = document.getElementById('sitemapUrlB');
+    fetchSitemapBBtn = document.getElementById('fetchSitemapBBtn');
+    compareTwoSitesBtn = document.getElementById('compareTwoSitesBtn');
+    manualSitemapABtn = document.getElementById('manualSitemapABtn');
+    manualSitemapBBtn = document.getElementById('manualSitemapBBtn');
+    
     // Elementos do Comparador HTML
     htmlComparatorInterface = document.getElementById('htmlComparatorInterface');
     htmlATextarea = document.getElementById('htmlA');
@@ -124,6 +143,13 @@ function setupEventListeners() {
     compareBtn.addEventListener('click', compareSitemaps);
     analyzeBtn.addEventListener('click', analyzeSitemap);
     
+    // Eventos para comparação de dois sites
+    fetchSitemapABtn.addEventListener('click', () => fetchSitemapForSite('A'));
+    fetchSitemapBBtn.addEventListener('click', () => fetchSitemapForSite('B'));
+    compareTwoSitesBtn.addEventListener('click', compareTwoSites);
+    manualSitemapABtn.addEventListener('click', () => showManualSitemapDialogForSite('A'));
+    manualSitemapBBtn.addEventListener('click', () => showManualSitemapDialogForSite('B'));
+    
     // Eventos do Comparador HTML
     compareHtmlBtn.addEventListener('click', compareHTML);
     previewBtn.addEventListener('click', previewNormalization);
@@ -150,6 +176,12 @@ function setupEventListeners() {
         radio.addEventListener('change', switchComparatorMode);
     });
     
+    // Eventos do seletor de modo de comparação
+    const comparisonModeRadios = document.querySelectorAll('input[name="comparisonMode"]');
+    comparisonModeRadios.forEach(radio => {
+        radio.addEventListener('change', switchComparisonMode);
+    });
+    
     // Evento do toggle de tema
     themeToggle.addEventListener('click', toggleTheme);
     
@@ -171,6 +203,9 @@ function setupEventListeners() {
     
     // Inicializa o modo correto
     switchComparatorMode();
+    
+    // Inicializa o modo de comparação correto
+    switchComparisonMode();
 }
 
 // FUNÇÕES PRINCIPAIS DO ROBÔ DE SITEMAP
@@ -343,6 +378,267 @@ function hideResults() {
     analysisStatus.classList.add('hidden');
 }
 
+// FUNÇÕES PARA COMPARAÇÃO DE DOIS SITES
+
+// Alterna entre modo de comparação (Site Único / Comparar 2 Sites)
+function switchComparisonMode() {
+    const selectedMode = document.querySelector('input[name="comparisonMode"]:checked').value;
+    
+    if (selectedMode === 'single') {
+        singleSiteConfig.classList.remove('hidden');
+        twoSitesConfig.classList.add('hidden');
+    } else if (selectedMode === 'two-sites') {
+        singleSiteConfig.classList.add('hidden');
+        twoSitesConfig.classList.remove('hidden');
+    }
+    
+    // Limpa resultados quando muda o modo
+    hideResults();
+}
+
+// Busca sitemap para um site específico (A ou B)
+async function fetchSitemapForSite(siteLetter) {
+    const siteUrlInput = siteLetter === 'A' ? siteUrlAInput : siteUrlBInput;
+    const sitemapUrlInput = siteLetter === 'A' ? sitemapUrlAInput : sitemapUrlBInput;
+    const fetchBtn = siteLetter === 'A' ? fetchSitemapABtn : fetchSitemapBBtn;
+    const sitemapTextarea = siteLetter === 'A' ? sitemapATextarea : sitemapBTextarea;
+    const previewElement = siteLetter === 'A' ? previewA : previewB;
+    
+    const siteUrl = siteUrlInput.value.trim();
+    const sitemapUrl = sitemapUrlInput.value.trim();
+    
+    if (!siteUrl) {
+        showError(`Por favor, informe a URL do Site ${siteLetter}.`);
+        return;
+    }
+    
+    showLoading(fetchBtn, `<i class="fas fa-search mr-2"></i>Buscando sitemap ${siteLetter}...`);
+    hideResults();
+    
+    try {
+        let sitemapContent = '';
+        let foundUrl = '';
+        
+        if (sitemapUrl) {
+            // Usar URL específica fornecida
+            foundUrl = sitemapUrl;
+            sitemapContent = await fetchSitemapFromUrl(sitemapUrl);
+        } else {
+            // Buscar automaticamente
+            const result = await findSitemap(siteUrl);
+            foundUrl = result.url;
+            sitemapContent = result.content;
+        }
+        
+        if (sitemapContent) {
+            sitemapTextarea.value = sitemapContent;
+            updateSitemapPreview();
+            showSitemapStatusForSite(siteLetter, foundUrl, sitemapContent);
+            showSuccess(`Sitemap ${siteLetter}`, `Sitemap do Site ${siteLetter} carregado com sucesso!`);
+        } else {
+            showError(`Não foi possível encontrar ou acessar o sitemap do Site ${siteLetter}.`);
+        }
+        
+    } catch (error) {
+        console.error(`Erro ao buscar sitemap ${siteLetter}:`, error);
+        
+        // Verifica se é erro de CORS
+        if (error.message.includes('CORS') || error.message.includes('blocked')) {
+            const targetUrl = sitemapUrl || `${siteUrl}/sitemap.xml`;
+            showCorsErrorForSite(siteLetter, targetUrl);
+        } else {
+            showError(`Erro ao buscar sitemap ${siteLetter}: ${error.message}`);
+        }
+    } finally {
+        hideLoading(fetchBtn, `<i class="fas fa-search mr-2"></i>Buscar Sitemap ${siteLetter}`);
+    }
+}
+
+// Compara dois sites diretamente
+async function compareTwoSites() {
+    const siteUrlA = siteUrlAInput.value.trim();
+    const siteUrlB = siteUrlBInput.value.trim();
+    
+    if (!siteUrlA || !siteUrlB) {
+        showError('Por favor, informe as URLs de ambos os sites.');
+        return;
+    }
+    
+    if (siteUrlA === siteUrlB) {
+        showError('Os dois sites não podem ser iguais. Use "Comparar Consigo Mesmo" no modo Site Único.');
+        return;
+    }
+    
+    showLoading(compareTwoSitesBtn, '<i class="fas fa-exchange-alt mr-2"></i>Comparando sites...');
+    hideResults();
+    
+    try {
+        // Busca sitemaps de ambos os sites
+        showInfo('Comparação de Sites', 'Buscando sitemaps de ambos os sites...');
+        
+        const [resultA, resultB] = await Promise.all([
+            fetchSitemapForSiteDirect(siteUrlA, sitemapUrlAInput.value.trim()),
+            fetchSitemapForSiteDirect(siteUrlB, sitemapUrlBInput.value.trim())
+        ]);
+        
+        // Verifica se pelo menos um sitemap foi obtido com sucesso
+        if (!resultA.success && !resultB.success) {
+            showError('Não foi possível obter os sitemaps de nenhum dos sites. Tente usar a opção "Inserir Manualmente".');
+            showCorsErrorForTwoSites(siteUrlA, siteUrlB);
+            return;
+        }
+        
+        // Se apenas um sitemap foi obtido, mostra aviso
+        if (!resultA.success || !resultB.success) {
+            const failedSite = !resultA.success ? 'A' : 'B';
+            const successSite = resultA.success ? 'A' : 'B';
+            
+            showWarning('Sitemap Parcial', `Sitemap do Site ${failedSite} não pôde ser obtido automaticamente. Você pode inserir manualmente ou continuar com apenas o Site ${successSite}.`);
+        }
+        
+        // Preenche os campos com os sitemaps encontrados (ou vazio se falhou)
+        sitemapATextarea.value = resultA.success ? resultA.content : '';
+        sitemapBTextarea.value = resultB.success ? resultB.content : '';
+        updateSitemapPreview();
+        
+        // Se ambos os sitemaps estão vazios, não pode comparar
+        if (!sitemapATextarea.value && !sitemapBTextarea.value) {
+            showError('Nenhum sitemap foi obtido. Use a opção "Inserir Manualmente" para colar o conteúdo dos sitemaps.');
+            return;
+        }
+        
+        // Se apenas um sitemap está disponível, mostra análise individual
+        if (!sitemapATextarea.value || !sitemapBTextarea.value) {
+            const availableSitemap = sitemapATextarea.value ? sitemapATextarea.value : sitemapBTextarea.value;
+            const siteName = sitemapATextarea.value ? 'Site A' : 'Site B';
+            
+            showInfo('Análise Individual', `Analisando apenas o ${siteName} (o outro sitemap não pôde ser obtido).`);
+            
+            const parsed = parseSitemap(availableSitemap);
+            if (parsed.success) {
+                const analysisData = analyzeSitemapData(parsed.data);
+                const analysis = formatSitemapAnalysis(analysisData);
+                showAnalysisStatus(`Análise do ${siteName}:<br><br>${analysis}`);
+            }
+            return;
+        }
+        
+        // Executa a comparação completa
+        const parsedA = parseSitemap(resultA.content);
+        const parsedB = parseSitemap(resultB.content);
+        
+        if (!parsedA.success || !parsedB.success) {
+            showError('Erro ao fazer parse dos sitemaps. Verifique se são XML válidos.');
+            return;
+        }
+        
+        // Validação adicional dos dados parseados
+        if (!parsedA.data || !Array.isArray(parsedA.data) || !parsedB.data || !Array.isArray(parsedB.data)) {
+            showError('Erro: Dados do sitemap inválidos após o parse.');
+            return;
+        }
+        
+        // Executa comparações
+        const urlDiffs = compareUrls(parsedA.data, parsedB.data);
+        const priorityDiffs = comparePriorities(parsedA.data, parsedB.data);
+        const frequencyDiffs = compareFrequencies(parsedA.data, parsedB.data);
+        const dateDiffs = compareDates(parsedA.data, parsedB.data);
+        const stats = generateStats(parsedA.data, parsedB.data);
+        
+        // Exibe resultados
+        urlResult.innerHTML = formatUrlComparison(urlDiffs);
+        priorityResult.innerHTML = formatPriorityComparison(priorityDiffs);
+        frequencyResult.innerHTML = formatFrequencyComparison(frequencyDiffs);
+        dateResult.innerHTML = formatDateComparison(dateDiffs);
+        statsResult.innerHTML = formatStatsComparison(stats);
+
+        // Atualiza contador
+        const totalDiffs = urlDiffs.added.length + urlDiffs.removed.length + urlDiffs.modified.length +
+                          priorityDiffs.length + frequencyDiffs.length + dateDiffs.length;
+        operationCount.textContent = `${totalDiffs} diferença${totalDiffs !== 1 ? 's' : ''} encontrada${totalDiffs !== 1 ? 's' : ''}`;
+        
+        resultSection.classList.remove('hidden');
+        resultSection.classList.add('animate-fade-in');
+        
+        showSuccess('Comparação Concluída', `Sites comparados com sucesso! ${totalDiffs} diferença${totalDiffs !== 1 ? 's' : ''} encontrada${totalDiffs !== 1 ? 's' : ''}.`);
+        
+    } catch (error) {
+        showError(`Erro durante a comparação: ${error.message}`);
+    } finally {
+        hideLoading(compareTwoSitesBtn, '<i class="fas fa-exchange-alt mr-3"></i>Comparar os 2 Sites');
+    }
+}
+
+// Busca sitemap diretamente para um site (função auxiliar)
+async function fetchSitemapForSiteDirect(siteUrl, sitemapUrl) {
+    try {
+        let sitemapContent = '';
+        let foundUrl = '';
+        
+        if (sitemapUrl) {
+            foundUrl = sitemapUrl;
+            sitemapContent = await fetchSitemapFromUrl(sitemapUrl);
+        } else {
+            const result = await findSitemap(siteUrl);
+            foundUrl = result.url;
+            sitemapContent = result.content;
+        }
+        
+        return { success: true, content: sitemapContent, url: foundUrl };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+// Mostra status do sitemap para um site específico
+function showSitemapStatusForSite(siteLetter, url, content) {
+    const parsed = parseSitemap(content);
+    let info = `<strong>Sitemap ${siteLetter} encontrado:</strong><br>`;
+    info += `• URL: ${escapeHtml(url)}<br>`;
+    info += `• Tamanho: ${content.length} caracteres<br>`;
+    
+    if (parsed.success) {
+        info += `• Itens: ${parsed.data.length}<br>`;
+        info += `• Tipo: ${parsed.data[0]?.type === 'sitemap' ? 'Sitemap Index' : 'Sitemap de URLs'}<br>`;
+        info += `<span class="result-success"><i class="fas fa-check-circle mr-2"></i>Sitemap ${siteLetter} válido e processado com sucesso</span>`;
+    } else {
+        info += `<span class="result-error"><i class="fas fa-exclamation-triangle mr-2"></i>Erro no parse: ${parsed.error}</span>`;
+    }
+    
+    sitemapInfo.innerHTML = info;
+    sitemapStatus.classList.remove('hidden');
+}
+
+// Mostra erro de CORS para um site específico
+function showCorsErrorForSite(siteLetter, url) {
+    let info = `<strong><i class="fas fa-exclamation-triangle mr-2"></i>Erro de CORS no Site ${siteLetter}:</strong><br><br>`;
+    info += `O site <strong>${escapeHtml(url)}</strong> bloqueia requisições CORS.<br><br>`;
+    info += `<strong><i class="fas fa-lightbulb mr-2"></i>Soluções:</strong><br>`;
+    info += `1. <strong>Copie manualmente:</strong> Acesse ${escapeHtml(url)} no seu navegador e cole o conteúdo<br>`;
+    info += `2. <strong>Use extensão CORS:</strong> Instale uma extensão como "CORS Unblock"<br>`;
+    info += `3. <strong>Proxy local:</strong> Configure um proxy local para desenvolvimento<br><br>`;
+    info += `<button onclick="openSitemapUrl('${escapeHtml(url)}')" class="btn btn--secondary btn--sm">Abrir Sitemap ${siteLetter} no Navegador</button>`;
+    
+    sitemapInfo.innerHTML = info;
+    sitemapStatus.classList.remove('hidden');
+}
+
+// Mostra erro de CORS para dois sites
+function showCorsErrorForTwoSites(siteUrlA, siteUrlB) {
+    let info = `<strong><i class="fas fa-exclamation-triangle mr-2"></i>Erro de CORS em Ambos os Sites:</strong><br><br>`;
+    info += `Os sites <strong>${escapeHtml(siteUrlA)}</strong> e <strong>${escapeHtml(siteUrlB)}</strong> bloqueiam requisições CORS.<br><br>`;
+    info += `<strong><i class="fas fa-lightbulb mr-2"></i>Soluções:</strong><br>`;
+    info += `1. <strong>Copie manualmente:</strong> Acesse os sitemaps no navegador e cole o conteúdo nos campos<br>`;
+    info += `2. <strong>Use extensão CORS:</strong> Instale uma extensão como "CORS Unblock"<br>`;
+    info += `3. <strong>Proxy local:</strong> Configure um proxy local para desenvolvimento<br><br>`;
+    info += `<strong><i class="fas fa-download mr-2"></i>Links diretos:</strong><br>`;
+    info += `<button onclick="openSitemapUrl('${escapeHtml(siteUrlA)}/sitemap.xml')" class="btn btn--secondary btn--sm mr-2">Abrir Sitemap A</button>`;
+    info += `<button onclick="openSitemapUrl('${escapeHtml(siteUrlB)}/sitemap.xml')" class="btn btn--secondary btn--sm">Abrir Sitemap B</button>`;
+    
+    sitemapInfo.innerHTML = info;
+    sitemapStatus.classList.remove('hidden');
+}
+
 // Busca sitemap automaticamente
 async function findSitemap(siteUrl) {
     const baseUrl = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
@@ -401,41 +697,85 @@ async function fetchSitemapFromUrl(url) {
 // Busca sitemap usando proxy CORS
 async function fetchWithProxy(url) {
     const proxyUrls = [
+        // Proxy 1: AllOrigins (mais confiável)
         `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+        
+        // Proxy 2: CORS Anywhere (backup)
         `https://cors-anywhere.herokuapp.com/${url}`,
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+        
+        // Proxy 3: CodeTabs
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        
+        // Proxy 4: CORS Proxy (novo)
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        
+        // Proxy 5: ThingProxy (backup adicional)
+        `https://thingproxy.freeboard.io/fetch/${url}`,
+        
+        // Proxy 6: Yacdn (proxy alternativo)
+        `https://yacdn.org/proxy/${url}`,
+        
+        // Proxy 7: Proxy CORS (mais um backup)
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}&format=text`
     ];
     
-    for (const proxyUrl of proxyUrls) {
+    const proxyNames = ['AllOrigins', 'CORS Anywhere', 'CodeTabs', 'CORS Proxy', 'ThingProxy', 'Yacdn', 'CodeTabs Text'];
+    
+    for (let i = 0; i < proxyUrls.length; i++) {
+        const proxyUrl = proxyUrls[i];
+        const proxyName = proxyNames[i];
+        
         try {
-            console.log(`Tentando proxy: ${proxyUrl}`);
+            console.log(`Tentando proxy ${i + 1}/${proxyUrls.length}: ${proxyName}`);
+            
             const response = await fetch(proxyUrl, {
                 method: 'GET',
                 headers: {
-                    'User-Agent': sitemapRobot.headers['User-Agent']
-                }
+                    'User-Agent': sitemapRobot.headers['User-Agent'],
+                    'Accept': 'application/xml, text/xml, */*'
+                },
+                // Timeout de 10 segundos
+                signal: AbortSignal.timeout(10000)
             });
             
             if (response.ok) {
                 let content;
-                if (proxyUrl.includes('allorigins.win')) {
-                    const data = await response.json();
-                    content = data.contents;
-                } else {
-                    content = await response.text();
-                }
                 
-                if (content && (content.includes('<urlset') || content.includes('<sitemapindex'))) {
-                    return { ok: true, text: () => Promise.resolve(content) };
+                try {
+                    if (proxyUrl.includes('allorigins.win')) {
+                        const data = await response.json();
+                        content = data.contents;
+                    } else if (proxyUrl.includes('corsproxy.io')) {
+                        content = await response.text();
+                    } else if (proxyUrl.includes('thingproxy.freeboard.io')) {
+                        content = await response.text();
+                    } else if (proxyUrl.includes('yacdn.org')) {
+                        content = await response.text();
+                    } else {
+                        content = await response.text();
+                    }
+                    
+                    // Valida se o conteúdo é um sitemap válido
+                    if (content && typeof content === 'string' && 
+                        (content.includes('<urlset') || content.includes('<sitemapindex'))) {
+                        console.log(`✅ Proxy ${proxyName} funcionou!`);
+                        return { ok: true, text: () => Promise.resolve(content) };
+                    } else {
+                        console.warn(`❌ Proxy ${proxyName} retornou conteúdo inválido`);
+                    }
+                } catch (parseError) {
+                    console.warn(`❌ Erro ao processar resposta do proxy ${proxyName}:`, parseError.message);
                 }
+            } else {
+                console.warn(`❌ Proxy ${proxyName} retornou status ${response.status}`);
             }
         } catch (proxyError) {
-            console.warn(`Proxy falhou: ${proxyError.message}`);
+            console.warn(`❌ Proxy ${proxyName} falhou:`, proxyError.message);
             continue;
         }
     }
     
-    throw new Error('Todos os proxies falharam');
+    throw new Error('Todos os proxies CORS falharam. Use a opção "Inserir Manualmente" para colar o conteúdo do sitemap.');
 }
 
 // Faz parse do XML do sitemap
@@ -916,6 +1256,23 @@ function showManualSitemapDialog() {
         targetUrl = 'https://exemplo.com/sitemap.xml';
     }
     
+    showManualSitemapDialogForSite('A', targetUrl, sitemapATextarea);
+}
+
+// Mostra diálogo para inserção manual de sitemap para um site específico
+function showManualSitemapDialogForSite(siteLetter, targetUrl = null, targetTextarea = null) {
+    const siteUrlInput = siteLetter === 'A' ? siteUrlAInput : siteUrlBInput;
+    const sitemapUrlInput = siteLetter === 'A' ? sitemapUrlAInput : sitemapUrlBInput;
+    const textarea = targetTextarea || (siteLetter === 'A' ? sitemapATextarea : sitemapBTextarea);
+    
+    const siteUrl = siteUrlInput.value.trim();
+    const sitemapUrl = sitemapUrlInput.value.trim();
+    
+    let finalTargetUrl = targetUrl || sitemapUrl || `${siteUrl}/sitemap.xml`;
+    if (!siteUrl && !sitemapUrl && !targetUrl) {
+        finalTargetUrl = 'https://exemplo.com/sitemap.xml';
+    }
+    
     const dialog = document.createElement('div');
     dialog.style.cssText = `
         position: fixed;
@@ -930,6 +1287,8 @@ function showManualSitemapDialog() {
         z-index: 1000;
     `;
     
+    const siteColor = siteLetter === 'A' ? '#3B82F6' : '#06B6D4';
+    
     dialog.innerHTML = `
         <div style="
             background: var(--color-surface);
@@ -939,15 +1298,15 @@ function showManualSitemapDialog() {
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
-            border: 2px solid var(--color-primary);
+            border: 2px solid ${siteColor};
             box-shadow: var(--shadow-lg);
         ">
-            <h3 style="margin-top: 0; color: var(--color-primary); font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold);"><i class="fas fa-clipboard mr-2"></i>Inserir Sitemap Manualmente</h3>
+            <h3 style="margin-top: 0; color: ${siteColor}; font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold);"><i class="fas fa-clipboard mr-2"></i>Inserir Sitemap ${siteLetter} Manualmente</h3>
             <p style="color: var(--color-text); margin-bottom: 16px; line-height: var(--line-height-normal);">
                 Quando há bloqueio de CORS, você pode copiar o sitemap manualmente:
             </p>
             <ol style="color: var(--color-text); margin-bottom: 16px; line-height: var(--line-height-normal);">
-                <li>Acesse o sitemap no navegador: <a href="${targetUrl}" target="_blank" style="color: var(--color-primary); text-decoration: none;">${targetUrl}</a></li>
+                <li>Acesse o sitemap no navegador: <a href="${finalTargetUrl}" target="_blank" style="color: ${siteColor}; text-decoration: none;">${finalTargetUrl}</a></li>
                 <li>Copie todo o conteúdo XML (Ctrl+A, Ctrl+C)</li>
                 <li>Cole no campo abaixo</li>
             </ol>
@@ -955,7 +1314,7 @@ function showManualSitemapDialog() {
                 style="width: 100%; height: 200px; padding: 12px; border: 1px solid var(--color-border); border-radius: 4px; font-family: var(--font-family-mono); font-size: 12px; background: var(--color-background); color: var(--color-text); resize: vertical;"></textarea>
             <div style="margin-top: 16px; text-align: right;">
                 <button id="cancelManualBtn" style="margin-right: 8px; padding: 8px 16px; border: 1px solid var(--color-border); background: var(--color-secondary); color: var(--color-text); border-radius: 4px; cursor: pointer; transition: var(--duration-fast) var(--ease-standard);">Cancelar</button>
-                <button id="confirmManualBtn" style="padding: 8px 16px; background: var(--color-primary); color: var(--color-btn-primary-text); border: none; border-radius: 4px; cursor: pointer; transition: var(--duration-fast) var(--ease-standard);">Inserir Sitemap</button>
+                <button id="confirmManualBtn" style="padding: 8px 16px; background: ${siteColor}; color: white; border: none; border-radius: 4px; cursor: pointer; transition: var(--duration-fast) var(--ease-standard);">Inserir Sitemap ${siteLetter}</button>
             </div>
         </div>
     `;
@@ -973,9 +1332,10 @@ function showManualSitemapDialog() {
     confirmBtn.addEventListener('click', () => {
         const content = document.getElementById('manualSitemapInput').value.trim();
         if (content) {
-            sitemapATextarea.value = content;
+            textarea.value = content;
             updateSitemapPreview();
-            showSitemapStatus(targetUrl, content);
+            showSitemapStatusForSite(siteLetter, finalTargetUrl, content);
+            showSuccess(`Sitemap ${siteLetter}`, `Sitemap ${siteLetter} inserido manualmente com sucesso!`);
             document.body.removeChild(dialog);
         } else {
             alert('Por favor, cole o conteúdo do sitemap.');
@@ -992,11 +1352,13 @@ function showManualSitemapDialog() {
     });
     
     confirmBtn.addEventListener('mouseenter', () => {
-        confirmBtn.style.background = 'var(--color-primary-hover)';
+        confirmBtn.style.background = siteColor;
+        confirmBtn.style.opacity = '0.9';
     });
     
     confirmBtn.addEventListener('mouseleave', () => {
-        confirmBtn.style.background = 'var(--color-primary)';
+        confirmBtn.style.background = siteColor;
+        confirmBtn.style.opacity = '1';
     });
     
     // Fecha ao clicar fora

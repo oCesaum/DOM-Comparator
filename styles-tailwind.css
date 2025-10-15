@@ -179,6 +179,42 @@ input[name="comparatorMode"] + span:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Botões de modo de comparação (Site Único/Comparar 2 Sites) */
+input[name="comparisonMode"]:checked + span {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    color: #3B82F6 !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    transform: scale(1.02);
+}
+
+input[name="comparisonMode"] + span:hover {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Configurações de modo de comparação */
+.comparison-mode-config {
+    transition: all 0.3s ease;
+}
+
+.comparison-mode-config.hidden {
+    display: none;
+}
+
+/* Botão de comparação de dois sites com gradiente */
+.bg-gradient-to-r.from-primary.to-accent {
+    background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.bg-gradient-to-r.from-primary.to-accent:hover {
+    background: linear-gradient(135deg, #2563EB 0%, #0891B2 100%);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
 /* Scrollbar customizada */
 .method-result::-webkit-scrollbar,
 .normalized-code::-webkit-scrollbar {
@@ -561,6 +597,32 @@ body::before {
     border-color: rgba(255, 255, 255, 0.4) !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Botões de modo de comparação (Site Único/Comparar 2 Sites) no tema escuro */
+[data-theme="dark"] input[name="comparisonMode"]:checked + span {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.6) !important;
+    color: #3B82F6 !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="dark"] input[name="comparisonMode"] + span:hover {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Botão de comparação de dois sites com gradiente no tema escuro */
+[data-theme="dark"] .bg-gradient-to-r.from-primary.to-accent {
+    background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%) !important;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4) !important;
+}
+
+[data-theme="dark"] .bg-gradient-to-r.from-primary.to-accent:hover {
+    background: linear-gradient(135deg, #2563EB 0%, #0891B2 100%) !important;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5) !important;
 }
 
 /* Inputs e textareas no tema escuro */
