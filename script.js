@@ -20,7 +20,6 @@ const sitemapRobot = {
 };
 
 // Elementos DOM
-let siteUrlInput, sitemapUrlInput, fetchSitemapBtn, compareWithSelfBtn, manualSitemapBtn;
 let sitemapATextarea, sitemapBTextarea, compareBtn, analyzeBtn;
 let resultSection, errorSection, operationCount, sitemapStatus, analysisStatus;
 let urlResult, priorityResult, frequencyResult, dateResult, statsResult, groupingResult;
@@ -37,7 +36,7 @@ let activeFilters = { type: 'all', search: '' };
 let currentDifferences = null;
 
 // Elementos DOM para comparação de dois sites
-let singleSiteConfig, twoSitesConfig;
+let twoSitesConfig;
 let siteUrlAInput, sitemapUrlAInput, fetchSitemapABtn;
 let siteUrlBInput, sitemapUrlBInput, fetchSitemapBBtn;
 let compareTwoSitesBtn, manualSitemapABtn, manualSitemapBBtn;
@@ -56,12 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeElements() {
-    // Elementos de configuração do site
-    siteUrlInput = document.getElementById('siteUrl');
-    sitemapUrlInput = document.getElementById('sitemapUrl');
-    fetchSitemapBtn = document.getElementById('fetchSitemapBtn');
-    compareWithSelfBtn = document.getElementById('compareWithSelfBtn');
-    manualSitemapBtn = document.getElementById('manualSitemapBtn');
+    // Elementos de configuração do site (removidos - apenas modo de 2 sites)
     
     // Elementos de sitemap
     sitemapATextarea = document.getElementById('sitemapA');
@@ -111,7 +105,6 @@ function initializeElements() {
     closeNotification = document.getElementById('closeNotification');
     
     // Elementos para comparação de dois sites
-    singleSiteConfig = document.getElementById('singleSiteConfig');
     twoSitesConfig = document.getElementById('twoSitesConfig');
     siteUrlAInput = document.getElementById('siteUrlA');
     sitemapUrlAInput = document.getElementById('sitemapUrlA');
@@ -153,10 +146,7 @@ function initializeElements() {
 }
 
 function setupEventListeners() {
-    // Eventos dos botões principais
-    fetchSitemapBtn.addEventListener('click', fetchSitemap);
-    compareWithSelfBtn.addEventListener('click', compareWithSelf);
-    manualSitemapBtn.addEventListener('click', showManualSitemapDialog);
+    // Eventos dos botões principais (removidos - apenas modo de 2 sites)
     compareBtn.addEventListener('click', compareSitemaps);
     analyzeBtn.addEventListener('click', analyzeSitemap);
     
@@ -177,9 +167,7 @@ function setupEventListeners() {
     htmlATextarea.addEventListener('input', hideResults);
     htmlBTextarea.addEventListener('input', hideResults);
     
-    // Eventos nos campos de URL
-    siteUrlInput.addEventListener('input', hideResults);
-    sitemapUrlInput.addEventListener('input', hideResults);
+    // Eventos nos campos de URL (removidos - apenas modo de 2 sites)
     
     // Eventos nos checkboxes para atualizar prévia em tempo real
     normalizeWhitespace.addEventListener('change', updatePreview);
@@ -193,11 +181,7 @@ function setupEventListeners() {
         radio.addEventListener('change', switchComparatorMode);
     });
     
-    // Eventos do seletor de modo de comparação
-    const comparisonModeRadios = document.querySelectorAll('input[name="comparisonMode"]');
-    comparisonModeRadios.forEach(radio => {
-        radio.addEventListener('change', switchComparisonMode);
-    });
+    // Eventos do seletor de modo de comparação (removido - apenas modo de 2 sites)
     
     // Evento do toggle de tema
     themeToggle.addEventListener('click', toggleTheme);
@@ -285,81 +269,14 @@ function setupEventListeners() {
     // Inicializa o modo correto
     switchComparatorMode();
     
-    // Inicializa o modo de comparação correto
-    switchComparisonMode();
+    // Inicializa o modo de comparação (apenas 2 sites)
 }
 
 // FUNÇÕES PRINCIPAIS DO ROBÔ DE SITEMAP
 
-// Busca sitemap de um site
-async function fetchSitemap() {
-    const siteUrl = siteUrlInput.value.trim();
-    const sitemapUrl = sitemapUrlInput.value.trim();
-    
-    if (!siteUrl) {
-        showError('Por favor, informe a URL do site.');
-        return;
-    }
-    
-    showLoading(fetchSitemapBtn, '<i class="fas fa-search mr-2"></i>Buscando sitemap...');
-    hideResults();
-    
-    try {
-        let sitemapContent = '';
-        let foundUrl = '';
-        
-        if (sitemapUrl) {
-            // Usar URL específica fornecida
-            foundUrl = sitemapUrl;
-            sitemapContent = await fetchSitemapFromUrl(sitemapUrl);
-        } else {
-            // Buscar automaticamente
-            const result = await findSitemap(siteUrl);
-            foundUrl = result.url;
-            sitemapContent = result.content;
-        }
-        
-        if (sitemapContent) {
-            sitemapATextarea.value = sitemapContent;
-            updateSitemapPreview();
-            showSitemapStatus(foundUrl, sitemapContent);
-        } else {
-            showError('Não foi possível encontrar ou acessar o sitemap.');
-        }
-        
-    } catch (error) {
-        console.error('Erro ao buscar sitemap:', error);
-        
-        // Verifica se é erro de CORS
-        if (error.message.includes('CORS') || error.message.includes('blocked')) {
-            const targetUrl = sitemapUrl || `${siteUrl}/sitemap.xml`;
-            showCorsError(targetUrl);
-        } else {
-            showError(`Erro ao buscar sitemap: ${error.message}`);
-        }
-    } finally {
-        hideLoading(fetchSitemapBtn, '<i class="fas fa-search mr-2"></i>Buscar Sitemap');
-    }
-}
+// Função removida - apenas modo de 2 sites
 
-// Compara sitemap consigo mesmo (para testar)
-async function compareWithSelf() {
-    const sitemapA = sitemapATextarea.value.trim();
-    
-    if (!sitemapA) {
-        showError('Por favor, primeiro busque um sitemap ou cole um sitemap no campo A.');
-        return;
-    }
-    
-    // Copia o sitemap A para o campo B
-    sitemapBTextarea.value = sitemapA;
-    updateSitemapPreview();
-    
-    // Executa a comparação
-    await compareSitemaps();
-    
-    showAnalysisStatus('Comparação realizada consigo mesmo - deve mostrar 0 diferenças.');
-}
+// Função removida - apenas modo de 2 sites
 
 // Compara dois sitemaps
 async function compareSitemaps() {
@@ -492,21 +409,8 @@ function hideResults() {
 
 // FUNÇÕES PARA COMPARAÇÃO DE DOIS SITES
 
-// Alterna entre modo de comparação (Site Único / Comparar 2 Sites)
-function switchComparisonMode() {
-    const selectedMode = document.querySelector('input[name="comparisonMode"]:checked').value;
-    
-    if (selectedMode === 'single') {
-        singleSiteConfig.classList.remove('hidden');
-        twoSitesConfig.classList.add('hidden');
-    } else if (selectedMode === 'two-sites') {
-        singleSiteConfig.classList.add('hidden');
-        twoSitesConfig.classList.remove('hidden');
-    }
-    
-    // Limpa resultados quando muda o modo
-    hideResults();
-}
+// Modo de comparação fixo (apenas 2 sites)
+// Função removida - sempre mostra configuração de 2 sites
 
 // Busca sitemap para um site específico (A ou B)
 async function fetchSitemapForSite(siteLetter) {
@@ -2043,10 +1947,11 @@ function formatUrlComparison(diffs) {
         modified: diffs.modified
     };
     
-    // Aplicar filtros e exibir
+    // Aplicar filtros e exibir diretamente
     applyFilters();
     
-    return ''; // O conteúdo será gerado pela função updateUrlDisplay
+    // Retornar conteúdo temporário enquanto os filtros são aplicados
+    return '<div class="text-center py-4 text-text-secondary"><i class="fas fa-spinner fa-spin mr-2"></i>Carregando diferenças...</div>';
 }
 
 function formatPriorityComparison(diffs) {
@@ -2199,18 +2104,7 @@ function openSitemapUrl(url) {
     window.open(url, '_blank');
 }
 
-// Mostra diálogo para inserção manual de sitemap
-function showManualSitemapDialog() {
-    const siteUrl = siteUrlInput.value.trim();
-    const sitemapUrl = sitemapUrlInput.value.trim();
-    
-    let targetUrl = sitemapUrl || `${siteUrl}/sitemap.xml`;
-    if (!siteUrl && !sitemapUrl) {
-        targetUrl = 'https://exemplo.com/sitemap.xml';
-    }
-    
-    showManualSitemapDialogForSite('A', targetUrl, sitemapATextarea);
-}
+// Função removida - apenas modo de 2 sites
 
 // Mostra diálogo para inserção manual de sitemap para um site específico
 function showManualSitemapDialogForSite(siteLetter, targetUrl = null, targetTextarea = null) {
