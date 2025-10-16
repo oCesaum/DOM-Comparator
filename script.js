@@ -41,8 +41,9 @@ let siteUrlAInput, sitemapUrlAInput, fetchSitemapABtn;
 let siteUrlBInput, sitemapUrlBInput, fetchSitemapBBtn;
 let compareTwoSitesBtn, manualSitemapABtn, manualSitemapBBtn;
 
-// Elementos DOM do Comparador HTML
-let htmlComparatorInterface, htmlATextarea, htmlBTextarea, compareHtmlBtn, previewBtn;
+// Elementos DOM das Interfaces
+let sitemapComparatorInterface, htmlComparatorInterface;
+let htmlATextarea, htmlBTextarea, compareHtmlBtn, previewBtn;
 let normalizedA, normalizedB, normalizationStatus, normalizationInfo;
 let normalizeWhitespace, normalizeAttributes, ignoreComments, normalizeCase;
 let textResult, domResult, attributeResult, hashResult, normalizedResult;
@@ -56,6 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeElements() {
     // Elementos de configuração do site (removidos - apenas modo de 2 sites)
+    
+    // Interfaces principais
+    sitemapComparatorInterface = document.getElementById('sitemapComparatorInterface');
+    htmlComparatorInterface = document.getElementById('htmlComparatorInterface');
     
     // Elementos de sitemap
     sitemapATextarea = document.getElementById('sitemapA');
@@ -2428,83 +2433,40 @@ function switchComparatorMode() {
     updateInputLabels();
     
     if (selectedMode === 'sitemap') {
-        // Mostra interface do sitemap - seção de configuração
-        const sections = document.querySelectorAll('section.bg-surface-light.p-8.rounded-2xl.mb-10');
-        console.log('Seções encontradas:', sections.length);
-        sections.forEach(section => {
-            const h2 = section.querySelector('h2');
-            if (h2 && h2.textContent.includes('Configuração do Site')) {
-                console.log('Mostrando seção de configuração do site');
-                section.style.display = 'block';
-            }
-        });
+        // Mostra interface do sitemap
+        const sitemapInterface = document.getElementById('sitemapComparatorInterface');
+        const htmlInterface = document.getElementById('htmlComparatorInterface');
         
-        // Mostra grid de sitemaps (primeiro grid)
-        const sitemapGrids = document.querySelectorAll('div.grid.grid-cols-1.lg\\:grid-cols-2.gap-8.mb-10');
-        if (sitemapGrids.length > 0) {
-            sitemapGrids[0].style.display = 'grid';
+        if (sitemapInterface) {
+            sitemapInterface.classList.remove('hidden');
+        }
+        if (htmlInterface) {
+            htmlInterface.classList.add('hidden');
         }
         
-        // Mostra botões de comparação de sitemap
-        const buttonSections = document.querySelectorAll('section.text-center.my-10');
-        buttonSections.forEach(section => {
-            const button = section.querySelector('button');
-            if (button && button.textContent.includes('Comparar Sitemaps')) {
-                section.style.display = 'block';
-            }
-        });
-        
-        // Mostra seções de status de sitemap
-        sitemapStatus.classList.remove('hidden');
-        analysisStatus.classList.remove('hidden');
-        
-        // Oculta interface do HTML
-        htmlComparatorInterface.classList.add('hidden');
-        normalizationStatus.classList.add('hidden');
-        
         // Mostra métodos do sitemap
-        sitemapMethods.classList.remove('hidden');
-        htmlMethods.classList.add('hidden');
+        if (sitemapMethods) sitemapMethods.classList.remove('hidden');
+        if (htmlMethods) htmlMethods.classList.add('hidden');
         
         // Atualiza título dos resultados
         const resultTitle = document.querySelector('#resultSection h3');
         if (resultTitle) resultTitle.textContent = 'Análise Completa dos Sitemaps';
         
     } else if (selectedMode === 'html') {
-        // Oculta interface do sitemap - seção de configuração
-        const sections = document.querySelectorAll('section.bg-surface-light.p-8.rounded-2xl.mb-10');
-        sections.forEach(section => {
-            const h2 = section.querySelector('h2');
-            if (h2 && h2.textContent.includes('Configuração do Site')) {
-                section.style.display = 'none';
-            }
-        });
+        // Mostra interface do HTML
+        const sitemapInterface = document.getElementById('sitemapComparatorInterface');
+        const htmlInterface = document.getElementById('htmlComparatorInterface');
         
-        // Oculta grid de sitemaps (primeiro grid)
-        const sitemapGrids = document.querySelectorAll('div.grid.grid-cols-1.lg\\:grid-cols-2.gap-8.mb-10');
-        if (sitemapGrids.length > 0) {
-            sitemapGrids[0].style.display = 'none';
+        if (sitemapInterface) {
+            sitemapInterface.classList.add('hidden');
+        }
+        if (htmlInterface) {
+            htmlInterface.classList.remove('hidden');
         }
         
-        // Oculta botões de comparação de sitemap
-        const buttonSections = document.querySelectorAll('section.text-center.my-10');
-        buttonSections.forEach(section => {
-            const button = section.querySelector('button');
-            if (button && button.textContent.includes('Comparar Sitemaps')) {
-                section.style.display = 'none';
-            }
-        });
-        
-        // Oculta seções de status de sitemap
-        sitemapStatus.classList.add('hidden');
-        analysisStatus.classList.add('hidden');
-        
-        // Mostra interface do HTML
-        htmlComparatorInterface.classList.remove('hidden');
-        
         // Mostra métodos do HTML
-        sitemapMethods.classList.add('hidden');
-        htmlMethods.classList.remove('hidden');
+        if (sitemapMethods) sitemapMethods.classList.add('hidden');
+        if (htmlMethods) htmlMethods.classList.remove('hidden');
         
         // Atualiza título dos resultados
         const resultTitle = document.querySelector('#resultSection h3');
@@ -2690,8 +2652,20 @@ function previewNormalization() {
 
 // Função principal de comparação HTML
 async function compareHTML() {
+    // Verifica se os elementos existem
+    if (!htmlATextarea || !htmlBTextarea) {
+        showError('Erro: Elementos HTML não foram inicializados corretamente.');
+        return;
+    }
+    
     const htmlA = htmlATextarea.value.trim();
     const htmlB = htmlBTextarea.value.trim();
+
+    // Debug: mostra o conteúdo dos campos
+    console.log('HTML A:', htmlA);
+    console.log('HTML B:', htmlB);
+    console.log('HTML A length:', htmlA.length);
+    console.log('HTML B length:', htmlB.length);
 
     if (!htmlA || !htmlB) {
         showError('Por favor, preencha ambos os campos HTML.');
@@ -2758,9 +2732,15 @@ async function compareHTML() {
         resultSection.classList.remove('hidden');
         resultSection.classList.add('animate-fade-in');
         
-        // Notificações contextuais
-        const context = analyzeComparisonContext(urlDiffs);
-        showContextualNotifications(context);
+        // Notificações contextuais para HTML
+        const htmlContext = {
+            totalDifferences: totalDifferences,
+            hasManyDifferences: totalDifferences > 10,
+            isCompletelyDifferent: totalDifferences > 50,
+            hasLargeDataset: false,
+            recommendations: []
+        };
+        showContextualNotifications(htmlContext);
 
     } catch (error) {
         showError(`Erro durante a comparação: ${error.message}`);

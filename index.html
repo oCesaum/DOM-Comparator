@@ -105,80 +105,130 @@
         </header>
 
         <div class="p-10">
-            <!-- Configuração do Site -->
-            <section class="bg-surface-light p-8 rounded-2xl mb-10 border border-border opacity-0 transform -translate-x-8 animate-section-slide-in hover:border-border-light transition-all duration-200">
-                <h2 class="text-primary mb-6 text-3xl font-bold"><i class="fas fa-globe mr-3"></i>Configuração do Site</h2>
-                
-                <!-- Modo de Comparação -->
-                <div class="mb-8">
-                    <h3 class="text-text-secondary mb-4 text-xl font-semibold">Modo de Comparação:</h3>
-                    <div class="flex flex-wrap gap-4 mb-6">
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="comparisonMode" value="two-sites" checked class="absolute opacity-0 cursor-pointer">
-                            <span class="flex items-center gap-3 px-6 py-4 bg-surface border-2 border-primary rounded-2xl text-text font-medium transition-all duration-200 hover:border-primary hover:bg-surface-light hover:scale-102">
-                                <i class="fas fa-exchange-alt text-xl text-accent"></i>
-                                <span class="text-lg">Comparar 2 Sites</span>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-
-
-                <!-- Configuração Comparar 2 Sites -->
-                <div id="twoSitesConfig" class="comparison-mode-config">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                        <!-- Site A -->
-                        <div class="bg-surface p-6 rounded-2xl border border-border">
-                            <h3 class="text-primary mb-4 text-xl font-bold"><i class="fas fa-globe mr-2"></i>Site A (Primeiro)</h3>
-                            <div class="mb-4">
-                                <label for="siteUrlA" class="block mb-2 font-semibold text-sm text-text">URL do Site A:</label>
-                                <input type="url" id="siteUrlA" class="block w-full px-3 py-2 text-sm text-text bg-surface border border-border rounded-lg transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="https://site1.com" required>
-                            </div>
-                            <div class="mb-4">
-                                <label for="sitemapUrlA" class="block mb-2 font-semibold text-sm text-text">URL do Sitemap A (opcional):</label>
-                                <input type="url" id="sitemapUrlA" class="block w-full px-3 py-2 text-sm text-text bg-surface border border-border rounded-lg transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="https://site1.com/sitemap.xml">
-                                <small class="text-text-muted text-xs mt-1 block">Deixe vazio para busca automática</small>
-                            </div>
-                            <button id="fetchSitemapABtn" class="w-full inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-lg font-medium text-sm transition-all duration-200 hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-lg">
-                                <i class="fas fa-search mr-2"></i>Buscar Sitemap A
-                            </button>
-                        </div>
-
-                        <!-- Site B -->
-                        <div class="bg-surface p-6 rounded-2xl border border-border">
-                            <h3 class="text-accent mb-4 text-xl font-bold"><i class="fas fa-globe mr-2"></i>Site B (Segundo)</h3>
-                            <div class="mb-4">
-                                <label for="siteUrlB" class="block mb-2 font-semibold text-sm text-text">URL do Site B:</label>
-                                <input type="url" id="siteUrlB" class="block w-full px-3 py-2 text-sm text-text bg-surface border border-border rounded-lg transition-all duration-200 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40" placeholder="https://site2.com" required>
-                            </div>
-                            <div class="mb-4">
-                                <label for="sitemapUrlB" class="block mb-2 font-semibold text-sm text-text">URL do Sitemap B (opcional):</label>
-                                <input type="url" id="sitemapUrlB" class="block w-full px-3 py-2 text-sm text-text bg-surface border border-border rounded-lg transition-all duration-200 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40" placeholder="https://site2.com/sitemap.xml">
-                                <small class="text-text-muted text-xs mt-1 block">Deixe vazio para busca automática</small>
-                            </div>
-                            <button id="fetchSitemapBBtn" class="w-full inline-flex items-center justify-center px-4 py-2 bg-accent text-white rounded-lg font-medium text-sm transition-all duration-200 hover:bg-accent-hover hover:-translate-y-0.5 hover:shadow-lg">
-                                <i class="fas fa-search mr-2"></i>Buscar Sitemap B
-                            </button>
-                        </div>
-                    </div>
+            <!-- Interface do Comparador de Sitemaps -->
+            <div id="sitemapComparatorInterface" class="transition-all duration-250">
+                <!-- Configuração do Site -->
+                <section class="bg-surface-light p-8 rounded-2xl mb-10 border border-border opacity-0 transform -translate-x-8 animate-section-slide-in hover:border-border-light transition-all duration-200">
+                    <h2 class="text-primary mb-6 text-3xl font-bold"><i class="fas fa-globe mr-3"></i>Configuração do Site</h2>
                     
-                    <div class="text-center">
-                        <button id="compareTwoSitesBtn" class="inline-flex items-center justify-center px-10 py-4 bg-gradient-to-r from-primary to-accent text-white rounded-2xl font-bold text-xl transition-all duration-200 hover:from-primary-hover hover:to-accent-hover hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
-                            <i class="fas fa-exchange-alt mr-3"></i>Comparar os 2 Sites
-                        </button>
+                    <!-- Modo de Comparação -->
+                    <div class="mb-8">
+                        <h3 class="text-text-secondary mb-4 text-xl font-semibold">Modo de Comparação:</h3>
+                        <div class="flex flex-wrap gap-4 mb-6">
+                            <label class="cursor-pointer relative">
+                                <input type="radio" name="comparisonMode" value="two-sites" checked class="absolute opacity-0 cursor-pointer">
+                                <span class="flex items-center gap-3 px-6 py-4 bg-surface border-2 border-primary rounded-2xl text-text font-medium transition-all duration-200 hover:border-primary hover:bg-surface-light hover:scale-102">
+                                    <i class="fas fa-exchange-alt text-xl text-accent"></i>
+                                    <span class="text-lg">Comparar 2 Sites</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Configuração Comparar 2 Sites -->
+                    <div id="twoSitesConfig" class="comparison-mode-config">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <!-- Site A -->
+                            <div class="bg-surface p-6 rounded-2xl border border-border">
+                                <h3 class="text-primary mb-4 text-xl font-bold"><i class="fas fa-globe mr-2"></i>Site A (Primeiro)</h3>
+                                <div class="mb-4">
+                                    <label for="siteUrlA" class="block mb-2 font-semibold text-sm text-text">URL do Site A:</label>
+                                    <input type="url" id="siteUrlA" class="block w-full px-3 py-2 text-sm text-text bg-surface border border-border rounded-lg transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="https://site1.com" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="sitemapUrlA" class="block mb-2 font-semibold text-sm text-text">URL do Sitemap A (opcional):</label>
+                                    <input type="url" id="sitemapUrlA" class="block w-full px-3 py-2 text-sm text-text bg-surface border border-border rounded-lg transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="https://site1.com/sitemap.xml">
+                                    <small class="text-text-muted text-xs mt-1 block">Deixe vazio para busca automática</small>
+                                </div>
+                                <button id="fetchSitemapABtn" class="w-full inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-lg font-medium text-sm transition-all duration-200 hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-lg">
+                                    <i class="fas fa-search mr-2"></i>Buscar Sitemap A
+                                </button>
+                            </div>
+
+                            <!-- Site B -->
+                            <div class="bg-surface p-6 rounded-2xl border border-border">
+                                <h3 class="text-accent mb-4 text-xl font-bold"><i class="fas fa-globe mr-2"></i>Site B (Segundo)</h3>
+                                <div class="mb-4">
+                                    <label for="siteUrlB" class="block mb-2 font-semibold text-sm text-text">URL do Site B:</label>
+                                    <input type="url" id="siteUrlB" class="block w-full px-3 py-2 text-sm text-text bg-surface border border-border rounded-lg transition-all duration-200 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40" placeholder="https://site2.com" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="sitemapUrlB" class="block mb-2 font-semibold text-sm text-text">URL do Sitemap B (opcional):</label>
+                                    <input type="url" id="sitemapUrlB" class="block w-full px-3 py-2 text-sm text-text bg-surface border border-border rounded-lg transition-all duration-200 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40" placeholder="https://site2.com/sitemap.xml">
+                                    <small class="text-text-muted text-xs mt-1 block">Deixe vazio para busca automática</small>
+                                </div>
+                                <button id="fetchSitemapBBtn" class="w-full inline-flex items-center justify-center px-4 py-2 bg-accent text-white rounded-lg font-medium text-sm transition-all duration-200 hover:bg-accent-hover hover:-translate-y-0.5 hover:shadow-lg">
+                                    <i class="fas fa-search mr-2"></i>Buscar Sitemap B
+                                </button>
+                            </div>
+                        </div>
                         
-                        <!-- Botões de fallback manual -->
-                        <div class="mt-6 flex flex-wrap gap-4 justify-center">
-                            <button id="manualSitemapABtn" class="inline-flex items-center justify-center px-6 py-3 bg-transparent text-primary border-2 border-primary rounded-xl font-semibold transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5 hover:shadow-lg">
-                                <i class="fas fa-clipboard mr-2"></i>Inserir Sitemap A Manualmente
+                        <div class="text-center">
+                            <button id="compareTwoSitesBtn" class="inline-flex items-center justify-center px-10 py-4 bg-gradient-to-r from-primary to-accent text-white rounded-2xl font-bold text-xl transition-all duration-200 hover:from-primary-hover hover:to-accent-hover hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
+                                <i class="fas fa-exchange-alt mr-3"></i>Comparar os 2 Sites
                             </button>
-                            <button id="manualSitemapBBtn" class="inline-flex items-center justify-center px-6 py-3 bg-transparent text-accent border-2 border-accent rounded-xl font-semibold transition-all duration-200 hover:bg-accent/10 hover:-translate-y-0.5 hover:shadow-lg">
-                                <i class="fas fa-clipboard mr-2"></i>Inserir Sitemap B Manualmente
-                            </button>
+                            
+                            <!-- Botões de fallback manual -->
+                            <div class="mt-6 flex flex-wrap gap-4 justify-center">
+                                <button id="manualSitemapABtn" class="inline-flex items-center justify-center px-6 py-3 bg-transparent text-primary border-2 border-primary rounded-xl font-semibold transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5 hover:shadow-lg">
+                                    <i class="fas fa-clipboard mr-2"></i>Inserir Sitemap A Manualmente
+                                </button>
+                                <button id="manualSitemapBBtn" class="inline-flex items-center justify-center px-6 py-3 bg-transparent text-accent border-2 border-accent rounded-xl font-semibold transition-all duration-200 hover:bg-accent/10 hover:-translate-y-0.5 hover:shadow-lg">
+                                    <i class="fas fa-clipboard mr-2"></i>Inserir Sitemap B Manualmente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Status do Sitemap -->
+                <section id="sitemapStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-clipboard-list text-3xl mr-3 text-primary"></i>
+                        <h3 class="text-xl font-bold text-text">Status do Sitemap</h3>
+                    </div>
+                    <div id="sitemapInfo" class="text-base text-text-secondary leading-relaxed"></div>
+                </section>
+
+                <!-- Áreas de Sitemap -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                    <div class="bg-surface-light p-6 rounded-2xl border border-border hover:border-border-light transition-all duration-200">
+                        <h3 class="text-primary mb-4 text-2xl font-bold">Sitemap A (Original) *</h3>
+                        <textarea id="sitemapA" class="w-full h-56 p-4 border-2 border-border rounded-xl font-mono text-sm leading-relaxed transition-all duration-200 mb-6 bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-1 focus:shadow-xl hover:border-border-light" placeholder="Cole aqui o sitemap original ou deixe o robô buscar..."></textarea>
+                        <div class="bg-surface rounded-xl p-4 border border-border">
+                            <h4 class="text-text-secondary text-sm mb-3 uppercase tracking-wide font-semibold">Prévia do Sitemap:</h4>
+                            <pre id="previewA" class="bg-surface border border-border rounded-lg text-sm p-3 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap text-text font-mono"></pre>
+                        </div>
+                    </div>
+                    <div class="bg-surface-light p-6 rounded-2xl border border-border hover:border-border-light transition-all duration-200">
+                        <h3 class="text-primary mb-4 text-2xl font-bold">Sitemap B (Comparação) *</h3>
+                        <textarea id="sitemapB" class="w-full h-56 p-4 border-2 border-border rounded-xl font-mono text-sm leading-relaxed transition-all duration-200 mb-6 bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-1 focus:shadow-xl hover:border-border-light" placeholder="Cole aqui o sitemap para comparação..."></textarea>
+                        <div class="bg-surface rounded-xl p-4 border border-border">
+                            <h4 class="text-text-secondary text-sm mb-3 uppercase tracking-wide font-semibold">Prévia do Sitemap:</h4>
+                            <pre id="previewB" class="bg-surface border border-border rounded-lg text-sm p-3 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap text-text font-mono"></pre>
                         </div>
                     </div>
                 </div>
-            </section>
+
+                <!-- Botão Comparar Sitemaps -->
+                <section class="text-center my-10">
+                    <button id="compareBtn" class="inline-flex items-center justify-center px-10 py-5 bg-primary text-white rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary-hover hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
+                        <i class="fas fa-search mr-3"></i>Comparar Sitemaps
+                    </button>
+                    <button id="analyzeBtn" class="inline-flex items-center justify-center px-10 py-5 bg-surface-light text-primary border-2 border-primary rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary/10 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102 ml-6">
+                        <i class="fas fa-chart-bar mr-3"></i>Analisar Sitemap
+                    </button>
+                </section>
+
+                <!-- Status da Análise -->
+                <section id="analysisStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-chart-bar text-3xl mr-3 text-primary"></i>
+                        <h3 class="text-xl font-bold text-text">Status da Análise</h3>
+                    </div>
+                    <div id="analysisInfo" class="text-base text-text-secondary leading-relaxed"></div>
+                </section>
+            </div>
 
             <!-- Interface do Comparador HTML (oculta por padrão) -->
             <div id="htmlComparatorInterface" class="transition-all duration-250 hidden">
@@ -273,55 +323,6 @@
                     <div id="normalizationInfo" class="text-base text-text-secondary leading-relaxed"></div>
                 </section>
             </div>
-
-            <!-- Status do Sitemap -->
-            <section id="sitemapStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-clipboard-list text-3xl mr-3 text-primary"></i>
-                    <h3 class="text-xl font-bold text-text">Status do Sitemap</h3>
-                </div>
-                <div id="sitemapInfo" class="text-base text-text-secondary leading-relaxed"></div>
-            </section>
-
-            <!-- Áreas de Sitemap -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-                <div class="bg-surface-light p-6 rounded-2xl border border-border hover:border-border-light transition-all duration-200">
-                    <h3 class="text-primary mb-4 text-2xl font-bold">Sitemap A (Original) *</h3>
-                    <textarea id="sitemapA" class="w-full h-56 p-4 border-2 border-border rounded-xl font-mono text-sm leading-relaxed transition-all duration-200 mb-6 bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-1 focus:shadow-xl hover:border-border-light" placeholder="Cole aqui o sitemap original ou deixe o robô buscar..."></textarea>
-                    <div class="bg-surface rounded-xl p-4 border border-border">
-                        <h4 class="text-text-secondary text-sm mb-3 uppercase tracking-wide font-semibold">Prévia do Sitemap:</h4>
-                        <pre id="previewA" class="bg-surface border border-border rounded-lg text-sm p-3 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap text-text font-mono"></pre>
-                    </div>
-                </div>
-                <div class="bg-surface-light p-6 rounded-2xl border border-border hover:border-border-light transition-all duration-200">
-                    <h3 class="text-primary mb-4 text-2xl font-bold">Sitemap B (Comparação) *</h3>
-                    <textarea id="sitemapB" class="w-full h-56 p-4 border-2 border-border rounded-xl font-mono text-sm leading-relaxed transition-all duration-200 mb-6 bg-surface text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:-translate-y-1 focus:shadow-xl hover:border-border-light" placeholder="Cole aqui o sitemap para comparação..."></textarea>
-                    <div class="bg-surface rounded-xl p-4 border border-border">
-                        <h4 class="text-text-secondary text-sm mb-3 uppercase tracking-wide font-semibold">Prévia do Sitemap:</h4>
-                        <pre id="previewB" class="bg-surface border border-border rounded-lg text-sm p-3 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap text-text font-mono"></pre>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Botão Comparar -->
-            <section class="text-center my-10">
-                <button id="compareBtn" class="inline-flex items-center justify-center px-10 py-5 bg-primary text-white rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary-hover hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102">
-                    <i class="fas fa-search mr-3"></i>Comparar Sitemaps
-                </button>
-                <button id="analyzeBtn" class="inline-flex items-center justify-center px-10 py-5 bg-surface-light text-primary border-2 border-primary rounded-2xl font-bold text-xl transition-all duration-200 hover:bg-primary/10 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/40 relative overflow-hidden transform translate-z-0 hover:scale-102 ml-6">
-                    <i class="fas fa-chart-bar mr-3"></i>Analisar Sitemap
-                </button>
-            </section>
-
-            <!-- Status da Análise -->
-            <section id="analysisStatus" class="bg-surface-light border-l-4 border-info rounded-2xl p-6 mb-10 hidden hover:border-border-light transition-all duration-200">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-chart-bar text-3xl mr-3 text-primary"></i>
-                    <h3 class="text-xl font-bold text-text">Status da Análise</h3>
-                </div>
-                <div id="analysisInfo" class="text-base text-text-secondary leading-relaxed"></div>
-            </section>
 
             <!-- Resumo Executivo -->
             <section id="executiveSummary" class="mt-10 p-8 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 rounded-2xl border-2 border-primary/20 hidden hover:border-primary/30 transition-all duration-200">

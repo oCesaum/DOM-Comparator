@@ -32,29 +32,36 @@
 
 O **DOM Comparator Universal** é uma ferramenta web avançada que oferece dois modos distintos de comparação com interface moderna e funcionalidades robustas:
 
-1. **🤖 Modo Sitemap**: Robô automatizado para busca, análise e comparação de sitemaps XML
-2. **🔧 Modo HTML**: Comparação inteligente de código HTML com normalização automática e múltiplos algoritmos
+1. **🤖 Modo Sitemap**: Comparação inteligente de sitemaps XML com busca automática e análise detalhada
+2. **🔧 Modo HTML**: Comparação de código HTML com normalização automática e múltiplos algoritmos
 
-A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ignorando diferenças irrelevantes de formatação e focando apenas nas mudanças estruturais e de conteúdo que realmente importam.
+A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ignorando diferenças irrelevantes de formatação e focando apenas nas mudanças estruturais e de conteúdo que realmente importam. Inclui funcionalidade especial para comparação direta entre dois sites diferentes.
+
+### 🆕 Funcionalidades Recentes
+- **Comparação de Dois Sites**: Nova funcionalidade para comparar sitemaps de sites diferentes diretamente
+- **Busca Paralela**: Busca automática de sitemaps em paralelo para melhor performance
+- **Análise Individual**: Quando apenas um sitemap é obtido, mostra análise detalhada do site disponível
+- **Sistema de Normalização Aprimorado**: 4 opções configuráveis de normalização HTML com prévia em tempo real
+- **Interface Modernizada**: Design system atualizado com melhor responsividade e acessibilidade
 
 ### 🎪 Características Principais
 
-- **🤖 Robô de Sitemap Inteligente**: Busca automática em 7 caminhos comuns, proxy CORS triplo e validação XML robusta
-- **🔧 Normalização Inteligente**: Remove diferenças de formatação desnecessárias com 4 opções configuráveis
-- **📊 Múltiplos Métodos**: 5 algoritmos diferentes de comparação para cada modo (10 total)
+- **🤖 Comparação de Sitemaps**: Análise detalhada de URLs, prioridades, frequências e datas com busca automática
+- **🔧 Comparação de HTML**: 5 métodos diferentes de comparação com normalização inteligente configurável
+- **🌐 Comparação de Dois Sites**: Funcionalidade especial para comparar sitemaps de sites diferentes diretamente
 - **🎨 Interface Moderna**: Design system baseado no Tailwind CSS com suporte completo a tema claro/escuro
 - **⚡ Performance Otimizada**: Processamento assíncrono, lazy loading e otimizações de memória
 - **📱 Totalmente Responsivo**: 4 breakpoints específicos (desktop, tablet, mobile, mobile portrait)
 - **🔄 Proxy CORS Triplo**: Resolve problemas de CORS usando 3 proxies diferentes (AllOrigins, CORS Anywhere, CodeTabs)
 - **🎭 Sistema de Notificações**: Toast notifications com 4 tipos diferentes (sucesso, erro, aviso, info)
-- **📋 Exemplos Pré-definidos**: 5 casos de uso prontos para teste e demonstração
+- **📋 Exemplos Pré-definidos**: Casos de uso prontos para teste e demonstração
 - **🌙 Tema Claro/Escuro**: Alternância completa com persistência no localStorage
 - **🔍 Prévia em Tempo Real**: Atualização automática conforme digitação
 - **📊 Análise Estatística**: Estatísticas detalhadas e contadores dinâmicos
 
 ## ✨ Funcionalidades
 
-### 🤖 Modo Sitemap (Robô Automatizado)
+### 🤖 Modo Sitemap (Comparação Inteligente)
 
 #### 🔍 Busca Automática de Sitemaps
 - **Detecção Inteligente**: Busca sitemaps em 7 caminhos comuns (`/sitemap.xml`, `/sitemap_index.xml`, `/sitemaps.xml`, `/sitemap/sitemap.xml`, `/sitemap/index.xml`, `/sitemap.xml.gz`, `/sitemap/sitemap.xml.gz`)
@@ -63,7 +70,13 @@ A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ign
 - **Fallback Manual Inteligente**: Diálogo modal para inserção manual quando CORS falha, com instruções detalhadas e link direto
 - **Headers Personalizados**: User-Agent específico (`SitemapComparatorRobot/1.0`) e headers de idioma para melhor compatibilidade
 - **Tratamento de Erros**: Mensagens informativas e sugestões de solução para diferentes tipos de erro
-- **Comparação Consigo Mesmo**: Funcionalidade para testar a ferramenta comparando um sitemap com ele mesmo
+
+#### 🌐 Comparação de Dois Sites
+- **Busca Paralela**: Busca sitemaps de dois sites simultaneamente para comparação direta
+- **Análise Individual**: Quando apenas um sitemap é obtido, mostra análise individual do site disponível
+- **Validação de URLs**: Verifica se as URLs dos sites são diferentes antes da comparação
+- **Processamento Assíncrono**: Busca e processa ambos os sitemaps em paralelo para melhor performance
+- **Fallback Inteligente**: Permite inserção manual quando busca automática falha
 
 #### 📊 Comparação de Sitemaps (5 Métodos)
 - **🔗 Comparação de URLs**: Detecta URLs adicionadas, removidas ou modificadas com contadores detalhados
@@ -109,6 +122,13 @@ A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ign
 - **Cálculo de Similaridade**: Percentual de similaridade baseado em distância de Levenshtein
 - **Status Visual**: Indica se conteúdo é idêntico ou modificado
 
+#### ⚙️ Sistema de Normalização Configurável
+- **4 Opções de Normalização**: Espaços em branco, ordenação de atributos, remoção de comentários, normalização de case
+- **Controle Individual**: Cada opção pode ser habilitada/desabilitada independentemente
+- **Prévia em Tempo Real**: Mostra o HTML normalizado conforme as opções são alteradas
+- **Estatísticas de Compressão**: Mostra redução de tamanho após normalização
+- **Fallback Inteligente**: Em caso de erro na normalização, usa o HTML original
+
 ### 🎨 Interface e Experiência do Usuário
 
 #### 🎭 Sistema de Notificações
@@ -142,24 +162,25 @@ A ferramenta permite comparar sitemaps e códigos HTML de forma inteligente, ign
 
 ## 🚀 Como Usar
 
-### 🤖 Modo Sitemap (Robô Automatizado)
+### 🤖 Modo Sitemap (Comparação Inteligente)
 
-#### 1. 📥 Configuração do Site
+#### 1. 📥 Configuração dos Sites
 1. Abra o arquivo `index.html` em seu navegador
 2. Selecione o modo **🤖 Sitemap** no seletor de modo
-3. Informe a URL do site no campo **URL do Site**
-4. (Opcional) Informe uma URL específica de sitemap
+3. Informe as URLs dos dois sites nos campos **Site A** e **Site B**
+4. (Opcional) Informe URLs específicas de sitemap para cada site
 
 #### 2. 🔍 Busca Automática
-1. Clique em **"🔍 Buscar Sitemap"** para busca automática
-2. O robô tentará encontrar o sitemap nos caminhos comuns
+1. Clique em **"🔍 Buscar Sitemap"** para cada site ou use **"Comparar os 2 Sites"**
+2. O sistema tentará encontrar os sitemaps nos caminhos comuns
 3. Se CORS falhar, use **"📋 Inserir Manualmente"** para colar o conteúdo
-4. Use **"🔄 Comparar Consigo Mesmo"** para testar a ferramenta
+4. A busca é feita em paralelo para ambos os sites
 
 #### 3. 📊 Comparação de Sitemaps
-1. Cole o segundo sitemap no campo **Sitemap B**
-2. Clique em **"🔍 Comparar Sitemaps"**
-3. Analise os resultados nos 5 métodos de comparação
+1. Após a busca automática, os sitemaps serão comparados automaticamente
+2. Para comparação manual, cole os sitemaps nos campos **Sitemap A** e **Sitemap B**
+3. Clique em **"🔍 Comparar Sitemaps"**
+4. Analise os resultados nos 5 métodos de comparação
 
 ### 🔧 Modo HTML (Comparação Inteligente)
 
@@ -345,24 +366,24 @@ function simpleHash(str) {
 
 ```
 DOM Comparator Universal/
-├── 📄 index.html              # Interface principal com seletor de modo dual
+├── 📄 index.html              # Interface principal com seletor de modo dual (520 linhas)
 ├── 🎨 styles-tailwind.css     # Design system completo baseado no Tailwind CSS
-├── ⚡ script.js               # Lógica JavaScript completa (2085 linhas)
+├── ⚡ script.js               # Lógica JavaScript completa (3189 linhas)
 └── 📖 README.md              # Documentação completa e detalhada
 ```
 
-### 📄 index.html (393 linhas)
+### 📄 index.html (520 linhas)
 - **Interface Dual Moderna**: Seletor de modo com radio buttons estilizados para alternar entre Sitemap e HTML
 - **Estrutura Semântica HTML5**: Meta tags completas para responsividade e SEO
 - **Dependências Externas**: jQuery 3.6.0, Underscore.js 1.9.1, Tailwind CSS via CDN, FontAwesome 6.5.1
-- **Configuração de Site**: Campos para URL do site e sitemap específico com validação
+- **Configuração de Dois Sites**: Campos para URLs de dois sites e sitemaps específicos com validação
 - **Áreas de Comparação**: Textareas responsivos com prévia em tempo real
 - **Resultados Dinâmicos**: Seções que alternam conforme o modo selecionado
 - **Sistema de Notificações**: Popup modal para feedback do usuário
 - **Toggle de Tema**: Botão para alternar entre tema claro e escuro
 - **Configuração Tailwind**: Configuração customizada com paleta de cores e animações
 
-### 🎨 styles-tailwind.css (822 linhas)
+### 🎨 styles-tailwind.css
 - **Design System Avançado**: Sistema de tokens baseado no Tailwind CSS com paleta moderna
 - **Tema Claro/Escuro Completo**: Suporte automático via `prefers-color-scheme` e controle manual
 - **Responsividade Total**: Breakpoints específicos para desktop (1280px+), tablet (768px-1024px), mobile (480px-768px) e mobile portrait (<480px)
@@ -373,10 +394,11 @@ DOM Comparator Universal/
 - **FontAwesome Integration**: Estilos específicos para ícones FontAwesome
 - **Scrollbar Customizada**: Scrollbars personalizadas para ambos os temas
 
-### ⚡ script.js (2095 linhas)
-- **Robô de Sitemap Inteligente**: Busca automática em 7 caminhos comuns com fallback manual
+### ⚡ script.js (3189 linhas)
+- **Comparação de Sitemaps**: Análise detalhada de URLs, prioridades, frequências e datas
+- **Comparação de Dois Sites**: Funcionalidade para comparar sitemaps de sites diferentes
 - **Proxy CORS Triplo**: Integração com 3 proxies diferentes (AllOrigins, CORS Anywhere, CodeTabs)
-- **10 Métodos de Comparação**: 5 para sitemaps + 5 para HTML com algoritmos distintos
+- **5 Métodos de Comparação HTML**: Normalizada, textual, DOM, atributos e hash
 - **Normalização Inteligente**: 4 opções configuráveis de normalização HTML
 - **Sistema de Notificações**: Toast notifications com 4 tipos diferentes
 - **Controle de Tema**: Alternância completa entre tema claro/escuro com persistência
@@ -530,23 +552,23 @@ const commonSitemapPaths = [
 
 ### 🤖 Exemplos de Sitemap
 
-#### 🔍 Exemplo 1: Busca Automática com Robô
+#### 🔍 Exemplo 1: Comparação de Dois Sites
 ```
-URL do Site: https://exemplo.com
-Robô busca automaticamente em 7 caminhos:
-✅ https://exemplo.com/sitemap.xml (encontrado!)
-❌ https://exemplo.com/sitemap_index.xml
-❌ https://exemplo.com/sitemaps.xml
-❌ https://exemplo.com/sitemap/sitemap.xml
-❌ https://exemplo.com/sitemap/index.xml
-❌ https://exemplo.com/sitemap.xml.gz
-❌ https://exemplo.com/sitemap/sitemap.xml.gz
+Site A: https://exemplo.com
+Site B: https://exemplo2.com
 ```
+**Processo**:
+1. 🔍 Busca paralela de sitemaps em ambos os sites
+2. ✅ Sitemap A encontrado em `/sitemap.xml` (150 URLs)
+3. ✅ Sitemap B encontrado em `/sitemap.xml` (180 URLs)
+4. 📊 Comparação automática executada
+
 **Resultado**: 
-- ✅ Sitemap encontrado em `/sitemap.xml`
-- 📊 150 URLs processadas
-- ⏱️ Tempo de busca: 2.3s
-- 🔄 Proxy CORS usado: AllOrigins
+- 🔗 URLs: +30 adicionadas, -5 removidas, +12 modificadas
+- ⭐ Prioridades: 8 mudanças detectadas
+- 📅 Datas: 15 URLs com datas atualizadas
+- 🔄 Frequências: 3 mudanças de frequência
+- ⏱️ Tempo total: 3.2s
 
 #### 📊 Exemplo 2: Comparação Detalhada de URLs
 ```xml
@@ -703,6 +725,7 @@ Robô busca automaticamente em 7 caminhos:
 ## 🔍 Casos de Uso
 
 ### 🤖 Sitemap Management
+- **Comparação de Sites**: Comparar sitemaps de sites diferentes para análise competitiva
 - **Monitoramento de SEO**: Detectar mudanças em sitemaps que afetam SEO
 - **Auditoria de Sites**: Verificar integridade e completude de sitemaps
 - **Comparação de Versões**: Identificar mudanças entre atualizações
@@ -711,6 +734,7 @@ Robô busca automaticamente em 7 caminhos:
 - **Validação de Sitemap Index**: Comparar sitemaps index com múltiplos sitemaps
 - **Análise de Frequências**: Monitorar mudanças nas frequências de atualização
 - **Auditoria de Datas**: Verificar se datas de modificação estão atualizadas
+- **Análise Competitiva**: Comparar estrutura de sitemaps entre concorrentes
 
 ### 🔧 HTML Development
 - **Testes de Regressão**: Verificar se mudanças não quebraram funcionalidades
